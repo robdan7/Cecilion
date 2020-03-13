@@ -1,10 +1,9 @@
-#define GLEW_STATIC
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
+//#include "../../glUtils/Test2.h"
+#include "demo.h"
 
-int main(void)
+int try_me(void)
 {
+    std::cout << "The API says hello" << std::endl;
     GLFWwindow* window;
 
     /* Initialize the library */
@@ -29,8 +28,6 @@ int main(void)
         /* Problem: glewInit failed, something is seriously wrong. */
         return -1;
     }
-
-    std::cout << glGetString(GL_VERSION) << std::endl;  // Print the OpenGL driver version
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
