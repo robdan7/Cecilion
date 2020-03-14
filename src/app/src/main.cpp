@@ -2,12 +2,19 @@
 //#include <GL/glew.h>
 //#include <GLFW/glfw3.h>
 #include <iostream>
-#include <demo/demo.h>
+//#include <demo/demo.h>
+//#include <libDemo/Test.h>
+//#include <demo/demo.h>
 //#include "../../glUtils/Test2.h"
-
+#define GLEW_STATIC
+#include <libDemo/Test.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <demo/demo.h>
 int main(void)
 {
-        std::cout << "Application says hello" << std::endl;
+        //std::cout << "Application says hello. " << std::endl;
+        std::cout << "Application says hello. Math says 1+1="<< Math::add(1,1) << std::endl;
         try_me();
 //    GLFWwindow* window;
 //

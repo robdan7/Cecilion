@@ -1,13 +1,22 @@
-# These fist lines of code makes GLFW and GLEW available to the entire src folder:
-#include GLFW
-include_directories(${PROJECT_SOURCE_DIR}/include/GLFW/include)
-link_directories(${PROJECT_SOURCE_DIR}/include/GLFW/lib-mingw)
-
-#include GLEW
-include_directories(${PROJECT_SOURCE_DIR}/include/GLEW/include)
-link_directories(${PROJECT_SOURCE_DIR}/include/GLEW/lib/Release/Win32)
+# These first lines tell the source folders to use the GLFW and GLEW directories
 
 
-# Now all we have to do is tell CMake to build the app and core
-add_subdirectory(app)
+
+
+# The executablemust be added AFTER we have added directories, otherwise they won't be included.
+#add_executable(Cecilion "")
+
+# Create engine library
+#add_library(Cecilion_engine STATIC "")
+
+# Add the core library and OpenGL libraries to the engine
+#target_link_libraries(Cecilion_engine Cecilion_Core glew32s.lib glfw3 gdi32  opengl32)
+# Include core directory so we get all the header files.
+#include_directories(${PROJECT_SOURCE_DIR}/src/core)
+
 add_subdirectory(core)
+
+
+
+
+#add_executable(Cecilion app/src/main.cpp)
