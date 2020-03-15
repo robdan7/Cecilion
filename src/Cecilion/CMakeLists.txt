@@ -14,9 +14,13 @@
 # Include core directory so we get all the header files.
 #include_directories(${PROJECT_SOURCE_DIR}/src/core)
 
+# Create Cecilion library
+add_library(Cecilion "")
+target_sources(Cecilion PUBLIC Cecilion.h)
+target_link_libraries(Cecilion Cecilion_Core)
+
+# Add include files to the library.
+#include_directories(Cecilion PUBLIC core)
+target_include_directories(Cecilion PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 add_subdirectory(core)
-
-
-
-
-#add_executable(Cecilion app/src/main.cpp)

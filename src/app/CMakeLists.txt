@@ -1,5 +1,4 @@
-add_subdirectory(src)
+add_executable(App src/Sandbox.cpp)
 
-add_executable(App src/main.cpp)
-include_directories(${PROJECT_SOURCE_DIR}/src/core)
-target_link_libraries(App Cecilion_Core)
+#link Cecilion library, thats all we have to to on this side of the src folder :)
+target_link_libraries(App Cecilion)
