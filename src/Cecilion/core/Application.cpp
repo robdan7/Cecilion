@@ -1,4 +1,4 @@
-#include <iostream>
+//#include <iostream>
 #include "Application.h"
 #include "demo/demo.h"
 namespace Cecilion {
@@ -17,6 +17,6 @@ namespace Cecilion {
     }
 
     void Application::run2() {
-        std::cout << "This is the application in Cecilion folder."<< std::endl;
+        //std::cout << "This is the application in Cecilion folder."<< std::endl;
     }
 }

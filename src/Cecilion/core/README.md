@@ -1,2 +1,2 @@
-#Core
-This is the core of the engine itself. This is where you'll find all the fun OpenGL stuff.
+#Cecilion Core folder
+This is the private core folder of Cecilion. Everything inside of this directory is private and is not intended to be included by an application.

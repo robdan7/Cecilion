@@ -3,7 +3,7 @@
 
 int try_me(void)
 {
-    std::cout << "The API says hello" << std::endl;
+    //std::cout << "The Demo says hello" << std::endl;
     GLFWwindow* window;
 
     /* Initialize the library */
@@ -22,10 +22,16 @@ int try_me(void)
     glfwMakeContextCurrent(window);
 
 
-    GLenum err = glewInit();
-    if (GLEW_OK != err)
+//    GLenum err = glewInit();
+//    if (GLEW_OK != err)
+//    {
+//        /* Problem: glewInit failed, something is seriously wrong. */
+//        return -1;
+//    }
+
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        /* Problem: glewInit failed, something is seriously wrong. */
+        //std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
 

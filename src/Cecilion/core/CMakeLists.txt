@@ -4,14 +4,16 @@
 # Create core library
 add_library(Cecilion_Core STATIC "")
 target_sources(Cecilion_Core PRIVATE
+        ${PROJECT_SOURCE_DIR}/include/glad/src/glad.c
         Application.cpp
         Application.h
         PUBLIC
         Application.h)
 
-
-
-target_link_libraries(Cecilion_Core Demo glew32s.lib glfw3 gdi32  opengl32)
+#glew32s.lib
+#spdlog
+target_link_libraries(Cecilion_Core Demo glfw3 gdi32  opengl32 )
+#target_link_libraries(Cecilion_Core Demo)
 
 # Add all sub directories. Make sure to set target_sources if you want library files to be included.
 #add_subdirectory(libDemo)
