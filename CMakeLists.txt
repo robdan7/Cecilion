@@ -18,9 +18,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include/glad/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/spdlog-1.x)
 link_directories(${PROJECT_SOURCE_DIR}/include/spdlog-1.x/src)
 
-# Tell CMake to build the app and Cecilion source code
+# Tell CMake to build the App and Cecilion source code
 add_subdirectory(${PROJECT_SOURCE_DIR}/src/Cecilion)
-add_subdirectory(${PROJECT_SOURCE_DIR}/src/app)
+add_subdirectory(${PROJECT_SOURCE_DIR}/src/App)
 
 
 

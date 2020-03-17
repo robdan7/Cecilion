@@ -1,14 +1,12 @@
 
 
 
-# Create core library
+# Create Core library
 add_library(Cecilion_Core STATIC "")
 target_sources(Cecilion_Core PRIVATE
         ${PROJECT_SOURCE_DIR}/include/glad/src/glad.c
         Application.cpp
-        Application.h
-        PUBLIC
-        Application.h)
+        Log.cpp)
 
 #glew32s.lib
 #spdlog
