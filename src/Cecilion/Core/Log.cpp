@@ -1,5 +1,5 @@
 #include "Log.h"
-#include "../Event/MessagingSystem.h"
+#include "../Event/EventSystem.h"
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace Cecilion {
