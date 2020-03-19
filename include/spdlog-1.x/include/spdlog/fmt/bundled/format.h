@@ -2889,7 +2889,7 @@ class format_int {
   std::string str() const { return std::string(str_, size()); }
 };
 
-// A formatter specialization for the Core types corresponding to internal::type
+// A formatter specialization for the core types corresponding to internal::type
 // constants.
 template <typename T, typename Char>
 struct formatter<T, Char,

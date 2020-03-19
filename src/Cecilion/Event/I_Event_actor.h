@@ -2,11 +2,11 @@
 // Created by Robin on 2020-03-17.
 //
 
-#ifndef CECILION_I_EVENTACTOR_H
-#define CECILION_I_EVENTACTOR_H
+#ifndef CECILION_I_EVENT_ACTOR_H
+#define CECILION_I_EVENT_ACTOR_H
 
 #include <iostream>
-#include "EventMessage.h"
+#include "Event_message.h"
 
 namespace Cecilion {
 
@@ -16,20 +16,20 @@ namespace Cecilion {
      * when an event has occurred. These types of function calls will always run in a separate thread.
      * It is therefore very important to secure the class for multi-threaded use.
      */
-    class I_EventActor {
+    class I_Event_actor {
 
     public:
-        typedef void(*EventCallback)(I_EventActor* actor, EventMessage* message);
-        I_EventActor(std::string name);
-        virtual ~I_EventActor();
-        void post(EventMessage* message);
-        void SubscribeTo(unsigned int MessageID, EventCallback callback);
-        void unsubscribe(unsigned int MessageID);
+        typedef void(*Event_callback)(I_Event_actor* actor, Event_message* message);
+        I_Event_actor(std::string name);
+        virtual ~I_Event_actor();
+        void post(Event_message* message);
+        void subscribe_to(unsigned int message_ID, Event_callback callback);
+        void unsubscribe(unsigned int message_ID);
         std::string name();
         // TODO implement post with a time delay.
     private:
-        std::string ActorName;
+        std::string actor_name;
     };
 }
 
-#endif //CECILION_I_EVENTACTOR_H
+#endif //CECILION_I_EVENT_ACTOR_H

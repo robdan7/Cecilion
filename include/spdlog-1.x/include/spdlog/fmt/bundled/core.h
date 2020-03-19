@@ -1,4 +1,4 @@
-// Formatting library for C++ - the Core API
+// Formatting library for C++ - the core API
 //
 // Copyright (c) 2012 - present, Victor Zverovich
 // All rights reserved.
@@ -708,7 +708,7 @@ enum type {
   custom_type
 };
 
-// Maps Core type T to the corresponding type enum constant.
+// Maps core type T to the corresponding type enum constant.
 template <typename T, typename Char>
 struct type_constant : std::integral_constant<type, custom_type> {};
 
@@ -828,7 +828,7 @@ enum { long_short = sizeof(long) == sizeof(int) };
 using long_type = conditional_t<long_short, int, long long>;
 using ulong_type = conditional_t<long_short, unsigned, unsigned long long>;
 
-// Maps formatting arguments to Core types.
+// Maps formatting arguments to core types.
 template <typename Context> struct arg_mapper {
   using char_type = typename Context::char_type;
 
@@ -1465,7 +1465,7 @@ inline std::basic_string<Char> vformat(
 
   **Example**::
 
-    #include <fmt/Core.h>
+    #include <fmt/core.h>
     std::string message = fmt::format("The answer is {}", 42);
   \endrst
 */

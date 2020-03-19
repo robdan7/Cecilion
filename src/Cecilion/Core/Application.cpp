@@ -1,4 +1,5 @@
 //#include <iostream>
+#include <iostream>
 #include "Application.h"
 #include "demo/demo.h"
 namespace Cecilion {
@@ -12,7 +13,7 @@ namespace Cecilion {
 
         try_me();
 //        while (true) {
-//            std::cout << "Hello world"<<std::endl;
+//            std::cout << "Hello world from applicationn"<<std::endl;
 //        }
     }
 
