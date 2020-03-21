@@ -1,9 +1,4 @@
-//
-// Created by Robin on 2020-03-17.
-//
-
-#ifndef CECILION_I_EVENT_ACTOR_H
-#define CECILION_I_EVENT_ACTOR_H
+#pragma once
 
 #include <iostream>
 #include "Event_message.h"
@@ -32,4 +27,3 @@ namespace Cecilion {
     };
 }
 
-#endif //CECILION_I_EVENT_ACTOR_H

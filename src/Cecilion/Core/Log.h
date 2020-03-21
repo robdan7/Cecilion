@@ -1,5 +1,4 @@
-#ifndef CECILION_CORE_LOG_H
-#define CECILION_CORE_LOG_H
+#pragma once
 #include <memory>
 #include "spdlog/spdlog.h"
 
@@ -32,6 +31,5 @@ namespace Cecilion {
 #define LOG_ERROR(...) ::Cecilion::Log::get_client_logger()->error(__VA_ARGS__)
 #define LOG_CRITICAL(...) ::Cecilion::Log::get_client_logger()->critical(__VA_ARGS__)
 
-#endif
 
 

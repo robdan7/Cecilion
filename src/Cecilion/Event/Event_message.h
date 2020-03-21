@@ -1,5 +1,4 @@
-#ifndef CECILION_EVENT_MESSAGE_H
-#define CECILION_EVENT_MESSAGE_H
+#pragma once
 namespace Cecilion {
     struct Event_message {
         unsigned const int c_message_ID;
@@ -8,4 +7,4 @@ namespace Cecilion {
         virtual ~Event_message() = default;
     };
 }
-#endif //CECILION_EVENT_MESSAGE_H
+

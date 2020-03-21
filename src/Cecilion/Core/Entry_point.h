@@ -1,5 +1,4 @@
-#ifndef CECILION_CORE_ENTRY_POINT_H
-#define CECILION_CORE_ENTRY_POINT_H
+#pragma once
 
 #include <iostream>
 #include "Event_system.h"
@@ -25,5 +24,3 @@ int main(int argc, char **argv) {
     delete app;
 //std::cout << "Hello world!" << std::endl;
 }
-
-#endif

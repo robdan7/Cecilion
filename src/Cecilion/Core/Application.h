@@ -1,5 +1,4 @@
-#ifndef CECILION_CORE_APPLICATION_H
-#define CECILION_CORE_APPLICATION_H
+#pragma once
 namespace Cecilion {
     class Application {
     public:
@@ -12,4 +11,3 @@ namespace Cecilion {
     // To be defined in client
     Application* CreateApplication();
 }
-#endif

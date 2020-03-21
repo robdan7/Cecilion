@@ -1,5 +1,4 @@
-#ifndef CECILION_EVENT_MESSAGINGSYSTEM_H
-#define CECILION_EVENT_MESSAGINGSYSTEM_H
+#pragma once
 #include <map>
 #include <list>
 #include <iterator>
@@ -24,5 +23,3 @@ namespace Cecilion {
 
 
 }
-
-#endif // CECILION_EVENT_MESSAGINGSYSTEM_H
