@@ -2,15 +2,6 @@
 
 #include <iostream>
 #include "Event_system.h"
-//#include "Log.h"
-
-//namespace Cecilion {
-//    class Application;
-//
-//    Application* CreateApplication();
-//}
-//
-//extern Cecilion::Application *Cecilion::CreateApplication();
 
 int main(int argc, char **argv) {
     Cecilion::Log::Init();
@@ -22,5 +13,4 @@ int main(int argc, char **argv) {
     app->run();
 
     delete app;
-//std::cout << "Hello world!" << std::endl;
 }

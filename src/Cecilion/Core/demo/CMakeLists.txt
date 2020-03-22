@@ -7,7 +7,7 @@ target_sources(Demo PRIVATE
         )
 
 target_include_directories(Demo PUBLIC ${PROJECT_SOURCE_DIR}/include/glfw-3.3.2x86/include)
-target_link_directories(Demo PUBLIC ${PROJECT_SOURCE_DIR}/include/glfw-3.3.2x86/lib-mingw)
+target_link_directories(Demo PUBLIC ${PROJECT_SOURCE_DIR}/include/glfw-3.3.2x86/lib-mingw-w64)
 
 target_link_directories(Demo PUBLIC ${PROJECT_SOURCE_DIR}/include/glew-2.1.0/lib/Release/Win32)
 target_include_directories(Demo PUBLIC ${PROJECT_SOURCE_DIR}/include/glew-2.1.0/include)

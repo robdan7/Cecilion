@@ -33,7 +33,7 @@ add_subdirectory(demo)
 target_include_directories(Cecilion_Core PUBLIC ${Cecilion_Event_HEADERS} PRIVATE demo)
 
 # --- Link libraries ---
-target_link_libraries(Cecilion_Core PUBLIC Cecilion_Log Demo PRIVATE Cecilion_Event )
+target_link_libraries(Cecilion_Core PUBLIC Cecilion_Log Demo Cecilion_Event )
 
 
 

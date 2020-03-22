@@ -13,12 +13,13 @@ namespace Cecilion {
     class Event_message;
     class Event_system {
     public:
-        static void post(Event_message* message);
+        static void post(const std::shared_ptr<Event_message>& message);
         static void Init();
-        static void subscribe(unsigned int message_ID, I_Event_actor* actor, I_Event_actor::Event_callback callback);
-        static void unsubscribe(unsigned int message_ID, I_Event_actor* actor);
+        static void subscribe(unsigned int event_ID, const std::shared_ptr<Event_inbox>& inbox, Event_inbox::Event_callback callback);
+        static void unsubscribe(unsigned int event_ID, Event_inbox* inbox);
+        static void unsubscribe_all(const std::shared_ptr<Event_inbox>& inbox);
     private:
-        static void dispatch_event(Event_message* message);
+        static void dispatch_event(const std::shared_ptr<Event_message>& event);
     };
 
 

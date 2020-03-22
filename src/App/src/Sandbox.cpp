@@ -1,31 +1,23 @@
-#define MACRO __LINE__
-//#include <iostream>
-//#include "../../Cecilion/Cecilion.h"
-
 #include <iostream>
+#include <utility>
 #include "Cecilion.h"
-#define APP_LINE __LINE__
-
-
-//int main() {
-//    Cecilion::Log::Init();
-//    CORE_LOG_INFO("Hello world");
-//    std::cout << "Hello world" << std::endl;
-//}
+#include "Event_inbox.h"
 
     struct demo: Cecilion::Event_message{
         string message;
-        demo(string message) : Event_message(1234) { this->message = message;}
-        ~demo() {};
+        explicit demo(string message) : Event_message(1234) { this->message = std::move(message);}
+        ~demo() override = default;
+        [[nodiscard]] virtual demo* clone() const {return new demo(this->message);}
     };
 
 
 class foo:public Cecilion::I_Event_actor {
 public:
 
-    static void call(Cecilion::I_Event_actor* actor, Cecilion::Event_message* mess) {
+    static void call(std::shared_ptr<Cecilion::I_Event_actor> actor, Cecilion::Event_message* mess) {
         LOG_INFO(dynamic_cast<demo*>(mess)->message);
-        //std::cout << "hejj" << std::endl;
+        //dynamic_cast<foo*>(actor.get())->post();
+        //std::cout << dynamic_cast<demo*>(mess)->message << std::endl;
     }
 
     foo() : I_Event_actor("Foo") {
@@ -33,8 +25,9 @@ public:
     }
 
     void post() {
-        demo* m = new demo("I have sent a message to myself. Weeeee");
-        Cecilion::I_Event_actor::post(m);
+        std::shared_ptr<Cecilion::Event_message> pointer = std::make_shared<demo>("I have sent a message to myself. Weeeee");
+        //demo* m =  new demo("I have sent a message to myself. Weeeee");
+        Cecilion::I_Event_actor::post(pointer);
         //Cecilion::Event_message* m = new Cecilion::Event_message(1234);
         //Cecilion::I_Event_actor::post_mt(m);
     }
@@ -44,8 +37,12 @@ class App : public Cecilion::Application {
 public :
     App() {
         foo* f = new foo();
-        f->post();
-
+        for (int i = 0; i < 20; i++) {
+            f->post();
+        }
+        LOG_INFO("I have posted a message");
+        f->unsubscribe(1234);
+        //f->post();
         //Cecilion::Event_system::CheckMessageStack();
 
     }
