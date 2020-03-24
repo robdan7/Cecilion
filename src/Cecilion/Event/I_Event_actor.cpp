@@ -1,9 +1,7 @@
 #include "I_Event_actor.h"
-
 #include <utility>
 #include "Event_inbox.h"
 
-using namespace Cecilion;
 namespace Cecilion {
 
     I_Event_actor::I_Event_actor(std::string name) {
@@ -38,7 +36,6 @@ namespace Cecilion {
 
     void I_Event_actor::unsubscribe(unsigned int message_ID) {
         this->actor_inbox->unsubscribe(message_ID);
-        //Event_system::unsubscribe(message_ID, this);
     }
 
 }

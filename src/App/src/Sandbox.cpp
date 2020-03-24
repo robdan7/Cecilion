@@ -1,9 +1,11 @@
+
 #include <iostream>
 #include <utility>
-#include "Cecilion.h"
-#include "Event_inbox.h"
+#include <Cecilion.h>
+#include "Event/I_Event_actor.h"
+#include "Event/Event_message.h"
 
-    struct demo: Cecilion::Event_message{
+    struct demo: Cecilion::Event_message {
         string message;
         explicit demo(string message) : Event_message(1234) { this->message = std::move(message);}
         ~demo() override = default;
@@ -38,10 +40,13 @@ public :
     App() {
         foo* f = new foo();
         for (int i = 0; i < 20; i++) {
+            if (i == 10) {
+                f->unsubscribe(1234);
+            }
             f->post();
         }
-        LOG_INFO("I have posted a message");
-        f->unsubscribe(1234);
+        //LOG_INFO("I have posted a message");
+
         //f->post();
         //Cecilion::Event_system::CheckMessageStack();
 

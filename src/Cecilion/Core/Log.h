@@ -1,9 +1,6 @@
 #pragma once
 #include <memory>
 #include "spdlog/spdlog.h"
-
-
-
 namespace Cecilion {
     class Log {
     public:
@@ -14,7 +11,6 @@ namespace Cecilion {
         static std::shared_ptr<spdlog::logger> s_core_logger;
         static std::shared_ptr<spdlog::logger> s_client_logger;
     };
-
 }
 
 // Define Core log macros
@@ -31,5 +27,10 @@ namespace Cecilion {
 #define LOG_ERROR(...) ::Cecilion::Log::get_client_logger()->error(__VA_ARGS__)
 #define LOG_CRITICAL(...) ::Cecilion::Log::get_client_logger()->critical(__VA_ARGS__)
 
-
-
+#ifdef CECILION_ENABLE_ASSERTS
+    #define ASSERT(x, ...) {if(!x) {LOG_ERROR("Assertion failed: {0}", __VA_ARGS__); __debugbreak();}}
+    #define CORE_ASSERT(x, ...) {if(!x) {CORE_LOG_ERROR("Assertion failed: {0}", __VA_ARGS__); __debugbreak();}}
+#else
+#define ASSERT(x,...)
+#define CORE_ASSERT(x,...)
+#endif

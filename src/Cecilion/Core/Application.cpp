@@ -1,20 +1,20 @@
 //#include <iostream>
 #include <iostream>
 #include "Application.h"
-#include "demo/demo.h"
+
 namespace Cecilion {
     Application::Application() {
-
+        this->m_window = Window::create_window();
     }
     Application::~Application() {
 
     }
     void Application::run() {
 
-        try_me();
-//        while (true) {
-//            std::cout << "Hello world from applicationn"<<std::endl;
-//        }
+        while (this->m_running) {
+            //std::cout << "Hello world from applicationn"<<std::endl;
+            this->m_window->on_update();
+        }
     }
 
     void Application::run2() {
