@@ -77,9 +77,9 @@ namespace Cecilion {
         this->message_stack_m.unlock();
     }
 
-    void Event_inbox::post(const std::shared_ptr<Event_message>& message) {
-        Event_system::post(message);
-    }
+//    void Event_inbox::post(const std::shared_ptr<Event_message>& message) {
+//        Event_system::post(message);
+//    }
 
 /**
  * Subscribe to an event. Do not subscribe to an event twice.

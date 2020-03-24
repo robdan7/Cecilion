@@ -25,10 +25,10 @@ namespace Cecilion {
      *
      * @param message
      */
-    void I_Event_actor::post(std::shared_ptr<Event_message> message) {
-        this->actor_inbox->post(std::move(message));
-        //Event_system::post(message);
-    }
+//    void I_Event_actor::post(std::shared_ptr<Event_message> message) {
+//        this->actor_inbox->post(std::move(message));
+//        //Event_system::post(message);
+//    }
 
     std::string I_Event_actor::name() {
         return this->actor_name;
@@ -37,5 +37,9 @@ namespace Cecilion {
     void I_Event_actor::unsubscribe(unsigned int message_ID) {
         this->actor_inbox->unsubscribe(message_ID);
     }
+
+//    void I_Event_actor::post(unsigned int message_ID) {
+//        this->post(std::make_shared<Event_message>(message_ID));
+//    }
 
 }

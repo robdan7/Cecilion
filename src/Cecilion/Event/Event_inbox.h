@@ -27,7 +27,7 @@ namespace Cecilion {
         explicit Event_inbox(std::shared_ptr<I_Event_actor>  event_parent);
         ~Event_inbox();
         void send_to_inbox(std::shared_ptr<Event_message> event, Event_callback callback);
-        static void post(const std::shared_ptr<Event_message>& message);
+        //static void post(const std::shared_ptr<Event_message>& message);
         void subscribe_to(int message_ID, Event_callback callback);
         void unsubscribe(int message_ID);
         void unsubscribe_all();

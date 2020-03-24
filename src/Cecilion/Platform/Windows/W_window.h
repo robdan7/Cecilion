@@ -5,12 +5,14 @@
 #include "GLFW/glfw3.h"
 
 #include "Core/Window.h"
+#include "Event/I_Event_actor.h"
+#include "Event/Event_message.h"
 //#include "Window.h"
 
 namespace Cecilion {
-    class W_window : public Window {
+    class W_window : public Window{
     public:
-        explicit W_window(const Window_properties& properties);
+        explicit W_window(const Window_properties &properties);
         ~W_window() override;
         void on_update() override;
         [[nodiscard]] inline unsigned int get_width() const override {return m_data->width;};

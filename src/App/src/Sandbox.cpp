@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <utility>
 #include <Cecilion.h>
@@ -7,9 +6,9 @@
 
     struct demo: Cecilion::Event_message {
         string message;
-        explicit demo(string message) : Event_message(1234) { this->message = std::move(message);}
+        explicit demo(string message) : Event_message(Cecilion::SYSTEM_STARTUP_EVENT) { this->message = std::move(message);}
         ~demo() override = default;
-        [[nodiscard]] virtual demo* clone() const {return new demo(this->message);}
+        //[[nodiscard]] virtual demo* clone() const {return new demo(this->message);}
     };
 
 
@@ -23,13 +22,13 @@ public:
     }
 
     foo() : I_Event_actor("Foo") {
-        this->subscribe_to(1234, &call);
+        this->subscribe_to(Cecilion::SYSTEM_STARTUP_EVENT, &call);
     }
 
     void post() {
         std::shared_ptr<Cecilion::Event_message> pointer = std::make_shared<demo>("I have sent a message to myself. Weeeee");
         //demo* m =  new demo("I have sent a message to myself. Weeeee");
-        Cecilion::I_Event_actor::post(pointer);
+        Cecilion::Event_system::post(pointer);
         //Cecilion::Event_message* m = new Cecilion::Event_message(1234);
         //Cecilion::I_Event_actor::post_mt(m);
     }
@@ -41,10 +40,11 @@ public :
         foo* f = new foo();
         for (int i = 0; i < 20; i++) {
             if (i == 10) {
-                f->unsubscribe(1234);
+                f->unsubscribe(Cecilion::SYSTEM_STARTUP_EVENT);
             }
             f->post();
         }
+
         //LOG_INFO("I have posted a message");
 
         //f->post();

@@ -1,5 +1,6 @@
 #pragma once
-#define CECILION_PLATFORM_WINDOWS
+
+#include "Platform/Platform.h"
 #include <string>
 
 namespace Cecilion {

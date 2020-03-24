@@ -14,6 +14,7 @@ namespace Cecilion {
     class Event_system {
     public:
         static void post(const std::shared_ptr<Event_message>& message);
+        static void post(unsigned int message_ID);
         static void Init();
         static void subscribe(unsigned int event_ID, const std::shared_ptr<Event_inbox>& inbox, Event_inbox::Event_callback callback);
         static void unsubscribe(unsigned int event_ID, Event_inbox* inbox);

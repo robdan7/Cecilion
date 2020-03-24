@@ -104,6 +104,11 @@ namespace Cecilion {
         dispatch_event(message);
     }
 
+    void Event_system::post(unsigned int message_ID) {
+        CheckInit();
+        dispatch_event(std::make_shared<Event_message>(message_ID));
+    }
+
 /**
  * This sends an event
  * @param event
@@ -121,7 +126,7 @@ namespace Cecilion {
             }
 
         }
-        CORE_LOG_ERROR("No actor is currently listening to message ID  " + std::to_string(event->c_message_ID));
+        //CORE_LOG_ERROR("No actor is currently listening to message ID  " + std::to_string(event->c_message_ID));
         actor_list_m.unlock();
     }
 
@@ -139,4 +144,6 @@ namespace Cecilion {
     void Event_system::unsubscribe_all(const std::shared_ptr<Event_inbox>& inbox) {
         // TODO implement this
     }
+
+
 }
