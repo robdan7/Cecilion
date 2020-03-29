@@ -6,57 +6,13 @@
 #include <vector>
 #include <thread>
 #include "Core/Log.h"
+#include "Inbox_entry_container.h"
 
 namespace Cecilion {
 
-    class ActorEntryContainer {
-        list<Inbox_entry*> inbox_entry_list;
-        std::mutex inbox_entry_m;
-    public:
-        ~ActorEntryContainer() {
-            this->inbox_entry_list.clear();
-        }
-        void add_inbox_entry(std::shared_ptr<Event_inbox> inbox, Event_inbox::Event_callback callback) {
-            this->inbox_entry_m.lock();
-            this->inbox_entry_list.push_front(new Inbox_entry(std::move(inbox), callback));
-            this->inbox_entry_m.unlock();
-        }
-
-        void deleteActor(Event_inbox*  p_inbox) {
-
-            this->inbox_entry_m.lock();
-            Inbox_entry* search_entry;
-            for (Inbox_entry* entry : this->inbox_entry_list) {
-                if (entry->get_inbox_target().get() == p_inbox) {
-                    search_entry = entry;
-                }
-            }
-            if (search_entry != nullptr) {
-                this->inbox_entry_list.remove(search_entry);
-            } else {
-                // TODO add proper throw event.
-                throw -1;
-            }
-//        this->actors->remove(actor);
-            this->inbox_entry_m.unlock();
-        }
-
-        void dispatch(const std::shared_ptr<Event_message>& event) {
-            this->inbox_entry_m.lock();
-            if (this->inbox_entry_list.empty()) {
-                this->inbox_entry_m.unlock();
-                // TODO add proper throw event.
-                throw -1;
-            }
-            for (Inbox_entry* entry : this->inbox_entry_list) {
-                entry->invoke_inbox(event);
-            }
-            this->inbox_entry_m.unlock();
-        }
-    };
 
 
-    map<unsigned int, ActorEntryContainer*>* actor_list;
+    map<unsigned int, Inbox_entry_container*>* actor_list;
     std::mutex actor_list_m;
     bool initialized = false;
 
@@ -71,7 +27,7 @@ namespace Cecilion {
 
     void Cecilion::Event_system::Init() {
         initialized = true;
-        actor_list = new map<unsigned int, ActorEntryContainer*>();
+        actor_list = new map<unsigned int, Inbox_entry_container*>();
         CORE_LOG_INFO("Event system up and running");
     }
 
@@ -85,10 +41,10 @@ namespace Cecilion {
  * @param actor
  * @param callback
  */
-    void Cecilion::Event_system::subscribe(unsigned int event_ID, const std::shared_ptr<Event_inbox>& inbox, Event_inbox::Event_callback callback) {
+    void Cecilion::Event_system::subscribe(unsigned int event_ID, const std::shared_ptr<I_Event_inbox>& inbox, I_Event_inbox::Event_callback callback) {
         CheckInit();
         actor_list_m.lock();
-        auto* actors = new ActorEntryContainer();
+        auto* actors = new Inbox_entry_container();
         if (actor_list->find(event_ID) == actor_list->end()) {
             (*actor_list)[event_ID] = actors;
         } else {
@@ -115,33 +71,33 @@ namespace Cecilion {
  */
     void Event_system::dispatch_event(const std::shared_ptr<Event_message>& event) {
         actor_list_m.lock();
-        if (actor_list->count(event->c_message_ID) > 0) {
+        if (actor_list->count(event->message_ID) > 0) {
             try {
-                actor_list->at(event->c_message_ID)->dispatch(event);
+                actor_list->at(event->message_ID)->dispatch(event);
                 actor_list_m.unlock();
                 return;
             } catch(int e) {
                 // There is a list of inboxes, but does no longer contain any inbox entries.
-                actor_list->erase(event->c_message_ID);
+                actor_list->erase(event->message_ID);
             }
 
         }
-        //CORE_LOG_ERROR("No actor is currently listening to message ID  " + std::to_string(event->c_message_ID));
+        CORE_LOG_WARN("No actor is currently listening to message ID  " + std::to_string(event->message_ID));
         actor_list_m.unlock();
     }
 
-    void Event_system::unsubscribe(unsigned int event_ID, Event_inbox*  actor) {
+    void Event_system::unsubscribe(unsigned int event_ID, I_Event_inbox*  actor) {
         CheckInit();
         actor_list_m.lock();
         if (actor_list->count(event_ID) == 0) {
             CORE_LOG_ERROR("Delete exception. No actors are subscribed to " + std::to_string(event_ID));
             return;
         }
-        actor_list->at(event_ID)->deleteActor(actor);
+        actor_list->at(event_ID)->delete_entry(actor);
         actor_list_m.unlock();
     }
 
-    void Event_system::unsubscribe_all(const std::shared_ptr<Event_inbox>& inbox) {
+    void Event_system::unsubscribe_all(const std::shared_ptr<I_Event_inbox>& inbox) {
         // TODO implement this
     }
 

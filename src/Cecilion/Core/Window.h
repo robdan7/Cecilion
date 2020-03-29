@@ -10,11 +10,14 @@ namespace Cecilion {
 
         Window_properties(
                 const std::string &title = "Cecilion engine",
-                unsigned int width = 1080,
+                unsigned int width = 1280,
                 unsigned int height = 720) :
                 title(title), width(width), height(height){}
     };
 
+    /**
+     * Generic window class.
+     */
     class Window {
     public:
         virtual ~Window() {}

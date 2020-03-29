@@ -1,13 +1,10 @@
 #pragma once
 
-#define GLEW_STATIC
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
-
 #include "Core/Window.h"
 #include "Event/I_Event_actor.h"
 #include "Event/Event_message.h"
 //#include "Window.h"
+#include <Platform/OpenGL/OpenGL.h>
 
 namespace Cecilion {
     class W_window : public Window{
@@ -19,7 +16,9 @@ namespace Cecilion {
         [[nodiscard]] inline unsigned int get_height() const override {return m_data->height;};
         void set_Vsync(bool vsync) override ;
         [[nodiscard]] bool has_Vsync() const override;
+        void activate_resize();
     private:
+
         virtual void shutdown();
         virtual void Init(const Window_properties& properties);
         //GLFWdindow* wandow;

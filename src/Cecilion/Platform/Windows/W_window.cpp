@@ -2,6 +2,7 @@
 #include "Core/Log.h"
 #include "Event/Event_system.h"
 
+
 namespace Cecilion {
     #define get_GLFW_window(window) (W_window*)glfwGetWindowUserPointer(window)
     static bool s_GLFW_initialized = false;
@@ -64,7 +65,8 @@ namespace Cecilion {
             //this_window->post(std::make_s)
             this_window->m_data->height = height;
             this_window->m_data->width = width;
-            Event_system::post(WINDOW_RESIZE_EVENT);
+            this_window->activate_resize();
+            Event_system::post(std::make_shared<Window_resize_event>(width, height));
             //CORE_LOG_INFO("Window was resized to ({0}, {1})", width, height);
         });
 
@@ -72,14 +74,26 @@ namespace Cecilion {
         /// These events should be handled by the app layers.
         glfwSetMouseButtonCallback(this->m_window, [](GLFWwindow* window, int button, int action, int mods){
             //W_window* this_window = get_GLFW_window(window);
-            //CORE_LOG_INFO("Button {0} set action {1}", button, action);
             Event_system::post(std::make_shared<Cecilion::Mouse_button_Event>(button, action, mods));
         });
 
         glfwSetKeyCallback(this->m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods){
             //CORE_LOG_INFO("Key {0} set action {1}", key, action);
-            Event_system::post(std::make_shared<Cecilion::Keyboard_Event>(key, scancode, action, mods));
+            Event_system::post(std::make_shared<Cecilion::Keyboard_key_Event>(key, scancode, action, mods));
         });
+
+        glfwSetCharCallback(this->m_window, [](GLFWwindow* window, unsigned int unicode) {
+            Event_system::post(std::make_shared<Keyboard_char_event>(unicode));
+        });
+
+        glfwSetCursorPosCallback(this->m_window, [] (GLFWwindow* window, double xpos, double ypos) {
+            Event_system::post(std::make_shared<Cecilion::Mouse_cursor_Event>(xpos, ypos));
+        });
+
+        glfwSetScrollCallback(this->m_window,  [] (GLFWwindow* window, double xoffset, double yoffset){
+            Event_system::post(std::make_shared<Cecilion::Mouse_scroll_Event>(xoffset, yoffset));
+        });
+
     }
 
     void W_window::set_Vsync(bool vsync) {
@@ -91,8 +105,8 @@ namespace Cecilion {
     }
 
     void W_window::on_update() {
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(1,1,0,1);
+        //glClear(GL_COLOR_BUFFER_BIT);
+        //glClearColor(1,1,0,1);
         glfwPollEvents();
         glfwSwapBuffers(this->m_window);
     }
@@ -102,6 +116,10 @@ namespace Cecilion {
         if (s_GLFW_initialized) {
             glfwTerminate();
         }
+    }
+
+    void W_window::activate_resize() {
+        glViewport(0,0, this->m_data->width, this->m_data->height);
     }
 
 }
