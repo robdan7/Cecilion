@@ -17,6 +17,7 @@ namespace Cecilion {
         void set_Vsync(bool vsync) override ;
         [[nodiscard]] bool has_Vsync() const override;
         void activate_resize();
+        inline void* get_native_window() override {return this->m_window;}
     private:
 
         virtual void shutdown();

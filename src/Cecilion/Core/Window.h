@@ -4,6 +4,12 @@
 #include <string>
 
 namespace Cecilion {
+    /**
+     * Abstract window class for Cecilion. The engine doesn't care what kind of window we're using.
+     * It could be on Windows, Linux or Mac, Cecilion doesn't care.
+     *
+     * TODO Implement support for multiple windows.
+     */
     struct Window_properties {
         std::string title;
         unsigned int width, height;
@@ -27,5 +33,6 @@ namespace Cecilion {
         virtual void set_Vsync(bool vsync) = 0;
         virtual bool has_Vsync() const = 0;
         static Window* create_window(const Window_properties& properties = Window_properties());
+        virtual void* get_native_window() = 0;
     };
 }

@@ -4,6 +4,7 @@
 #include "Log.h"
 #include <Event/Async_inbox.h>
 #include <Platform/OpenGL/OpenGL.h>
+#include "Input.h"
 // TODO App layers for input handling, rendering and other stuff, y'now.
 namespace Cecilion {
     Application* Application::s_instance = nullptr;

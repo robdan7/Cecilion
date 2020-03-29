@@ -43,10 +43,10 @@ namespace Cecilion {
         ImGuiIO& io = ImGui::GetIO();
         switch (key_event->action) {
             case 0:
-                io.KeysDown[key_event->key] = false;
+                io.KeysDown[key_event->keycode] = false;
                 break;
             case 1:
-                io.KeysDown[key_event->key] = true;
+                io.KeysDown[key_event->keycode] = true;
 
                 io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
                 io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
@@ -118,7 +118,7 @@ namespace Cecilion {
     }
 
     void ImGui_layer::on_detach() {
-
+        // TODO Implement detach.
     }
 
     void ImGui_layer::on_update() {

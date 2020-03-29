@@ -1,6 +1,7 @@
 #include "W_window.h"
-#include "Core/Log.h"
-#include "Event/Event_system.h"
+#include <Core/Log.h>
+#include <Event/Event_system.h>
+#include <Core/Input.h>
 
 
 namespace Cecilion {
@@ -74,12 +75,14 @@ namespace Cecilion {
         /// These events should be handled by the app layers.
         glfwSetMouseButtonCallback(this->m_window, [](GLFWwindow* window, int button, int action, int mods){
             //W_window* this_window = get_GLFW_window(window);
-            Event_system::post(std::make_shared<Cecilion::Mouse_button_Event>(button, action, mods));
+            Event_system::post(std::make_shared<Cecilion::Mouse_button_Event>(button, action));
+//            Input::notify_mouse_button(button, action);
         });
 
         glfwSetKeyCallback(this->m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods){
             //CORE_LOG_INFO("Key {0} set action {1}", key, action);
-            Event_system::post(std::make_shared<Cecilion::Keyboard_key_Event>(key, scancode, action, mods));
+            Event_system::post(std::make_shared<Cecilion::Keyboard_key_Event>(key, action));
+//            Input::notify_key_status(key, action);
         });
 
         glfwSetCharCallback(this->m_window, [](GLFWwindow* window, unsigned int unicode) {

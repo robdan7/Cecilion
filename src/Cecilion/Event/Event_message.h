@@ -23,8 +23,8 @@ namespace Cecilion {
     };
 
     struct Mouse_button_Event : public Event_message {
-        const int button, action, mods;
-        Mouse_button_Event(int button, int action, int mods) : Event_message(MOUSE_BUTTON_EVENT), button(button), action(action), mods(mods) {
+        const int button, action;
+        Mouse_button_Event(int button, int action) : Event_message(MOUSE_BUTTON_EVENT), button(button), action(action) {
         }
     };
 
@@ -40,8 +40,8 @@ namespace Cecilion {
     };
 
     struct Keyboard_key_Event : public Event_message {
-        const int key, scancode, action, mods;
-        Keyboard_key_Event(int key, int scancode, int action, int mods) : Event_message(KEYBOARD_KEY_EVENT), key(key), scancode(scancode), action(action), mods(mods) {}
+        const int keycode, action;
+        Keyboard_key_Event(int keycode, int action) : Event_message(KEYBOARD_KEY_EVENT), keycode(keycode), action(action) {}
     };
 
     struct Keyboard_char_event : public Event_message {

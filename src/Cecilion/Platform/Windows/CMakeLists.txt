@@ -12,7 +12,7 @@ include(${PROJECT_SOURCE_DIR}/src/Cecilion/Cecilion_HEADERS.cmake)
 
 
 add_library(Windows_library STATIC "")
-target_sources(Windows_library PUBLIC W_window.cpp W_window.h )
+target_sources(Windows_library PUBLIC W_window.cpp W_window.h Windows_input.cpp)
 target_include_directories(Windows_library PRIVATE ${CECILION_HEADER})
 
 #target_include_directories(Windows_library PUBLIC ${PROJECT_SOURCE_DIR}/include/glfw-3.3.2x86/include)
@@ -22,6 +22,6 @@ target_include_directories(Windows_library PRIVATE ${CECILION_HEADER})
 #target_include_directories(Windows_library PUBLIC ${PROJECT_SOURCE_DIR}/include/glew-2.1.0/include)
 
 #target_link_libraries(Windows_library PUBLIC glfw3  glew32s gdi32  opengl32 PRIVATE Cecilion_Log)
-target_link_libraries(Windows_library PRIVATE Cecilion_Log OpenGL)
+target_link_libraries(Windows_library PRIVATE Cecilion_Log OpenGL Cecilion_input)
 target_precompile_headers(Windows_library PUBLIC W_window.h)
 
