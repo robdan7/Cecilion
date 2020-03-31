@@ -14,7 +14,7 @@ void test(std::shared_ptr<Cecilion::I_Event_actor> actor, Cecilion::Event_messag
 }
 
 void test2(std::shared_ptr<Cecilion::I_Event_actor> actor, Cecilion::Event_message* message) {
-    LOG_INFO("Pressed mouse key!");
+    LOG_INFO("App pressed mouse key!");
 }
 
 class foo:public Cecilion::I_Event_actor {
@@ -59,15 +59,15 @@ public :
         std::shared_ptr<Cecilion::Application_layer_st> layer = std::make_shared<Cecilion::Application_layer_st>();
         std::shared_ptr<Cecilion::Application_layer_st> layer2 = std::make_shared<Cecilion::Application_layer_st>();
 
-        this->push_overlay(layer);
-        this->push_layer(layer2);
+        this->push_layer(layer);
+        this->push_overlay(layer2);
 //        layer2->subscribe_to(Cecilion::MOUSE_CURSOR_POS_EVENT, &test2);
         layer->subscribe_to(Cecilion::MOUSE_BUTTON_EVENT, &test2);
         layer2->subscribe_to(Cecilion::KEYBOARD_KEY_EVENT, &test);
 
 
-        std::shared_ptr<Cecilion::Application_layer_mt> layer3 = std::make_shared<Cecilion::ImGui_layer>();
-        this->push_overlay(layer3);
+//        std::shared_ptr<Cecilion::Application_layer_mt> layer3 = std::make_shared<Cecilion::ImGui_layer>();
+//        this->push_overlay(layer3);
         //LOG_INFO("I have posted a message");
 
         //f->post();

@@ -149,4 +149,13 @@ namespace Cecilion {
 
     }
 
+    void Layer_stack::on_imgui_render() {
+        for (const std::shared_ptr<Application_layer>& layer : this->layers) {
+            layer->on_imgui_render();
+        }
+        for (const std::shared_ptr<Application_layer>& layer : this->overlays) {
+            layer->on_imgui_render();
+        }
+    }
+
 }

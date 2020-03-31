@@ -15,6 +15,7 @@ namespace Cecilion {
         void push_layer(const std::shared_ptr<Application_layer>& layer, bool overlay);
         void pop_layer(const std::shared_ptr<Application_layer>& layer, bool overlay);
         void on_update();
+        void on_imgui_render();
     private:
         void remap_inbox_entries(Application_layer* layer);
         std::map<unsigned int, Inbox_entry*> inbox_entries;

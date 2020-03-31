@@ -1,5 +1,7 @@
 #include "ImGui_layer.h"
-#include <Platform/OpenGL/imgui_impl_opengl3.h>
+
+#include "ImGui_build.cpp"
+//#include <Platform/OpenGL/imgui_impl_opengl3.h>
 #include <Platform/OpenGL/OpenGL.h>
 #include <Core/Application.h>
 #include <Core/Log.h>
@@ -35,7 +37,7 @@ namespace Cecilion {
     void on_mouse_cursor_event(std::shared_ptr<I_Event_actor> actor, Event_message* message) {
         Mouse_cursor_Event* cursor_event = dynamic_cast<Mouse_cursor_Event*>(message);
         ImGuiIO& io = ImGui::GetIO();
-        io.MousePos = ImVec2(cursor_event->xpos, cursor_event->ypos);
+//        io.MousePos = ImVec2(cursor_event->xpos, cursor_event->ypos);
     }
 
     void on_key_event(std::shared_ptr<I_Event_actor> actor, Event_message* message) {
@@ -76,68 +78,118 @@ namespace Cecilion {
 
     void ImGui_layer::on_attach() {
         CORE_ASSERT(!this->p_parent, "Layer was attached without a parent!");
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        //io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
+        //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+
+        // Setup Dear ImGui style
         ImGui::StyleColorsDark();
-        ImGuiIO& io = ImGui::GetIO();
-        io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
-        io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
+        //ImGui::StyleColorsClassic();
+
+        // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+        ImGuiStyle& style = ImGui::GetStyle();
+//        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+//        {
+//            style.WindowRounding = 0.0f;
+//            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+//        }
+
+        Application& app = Application::get();
+        GLFWwindow* window = static_cast<GLFWwindow*>(app.get_window().get_native_window());
+
+        // Setup Platform/Renderer bindings
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+
+
+
+
+//        ImGui::CreateContext();
+//        ImGui::StyleColorsDark();
+//        ImGuiIO& io = ImGui::GetIO();
+        //io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
+        //io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;
 
 
         // TODO implements Cecilion key codes.
-        io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
-        io.KeyMap[ImGuiKey_LeftArrow] = GLFW_KEY_LEFT;
-        io.KeyMap[ImGuiKey_RightArrow] = GLFW_KEY_RIGHT;
-        io.KeyMap[ImGuiKey_UpArrow] = GLFW_KEY_UP;
-        io.KeyMap[ImGuiKey_DownArrow] = GLFW_KEY_DOWN;
-        io.KeyMap[ImGuiKey_PageUp] = GLFW_KEY_PAGE_UP;
-        io.KeyMap[ImGuiKey_PageDown] = GLFW_KEY_PAGE_DOWN;
-        io.KeyMap[ImGuiKey_Home] = GLFW_KEY_HOME;
-        io.KeyMap[ImGuiKey_End] = GLFW_KEY_END;
-        io.KeyMap[ImGuiKey_Insert] = GLFW_KEY_INSERT;
-        io.KeyMap[ImGuiKey_Delete] = GLFW_KEY_DELETE;
-        io.KeyMap[ImGuiKey_Backspace] = GLFW_KEY_BACKSPACE;
-        io.KeyMap[ImGuiKey_Space] = GLFW_KEY_SPACE;
-        io.KeyMap[ImGuiKey_Enter] = GLFW_KEY_ENTER;
-        io.KeyMap[ImGuiKey_Escape] = GLFW_KEY_ESCAPE;
-        io.KeyMap[ImGuiKey_KeyPadEnter] = GLFW_KEY_KP_ENTER;
-        io.KeyMap[ImGuiKey_A] = GLFW_KEY_A;
-        io.KeyMap[ImGuiKey_C] = GLFW_KEY_C;
-        io.KeyMap[ImGuiKey_V] = GLFW_KEY_V;
-        io.KeyMap[ImGuiKey_X] = GLFW_KEY_X;
-        io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
-        io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
+//        io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
+//        io.KeyMap[ImGuiKey_LeftArrow] = GLFW_KEY_LEFT;
+//        io.KeyMap[ImGuiKey_RightArrow] = GLFW_KEY_RIGHT;
+//        io.KeyMap[ImGuiKey_UpArrow] = GLFW_KEY_UP;
+//        io.KeyMap[ImGuiKey_DownArrow] = GLFW_KEY_DOWN;
+//        io.KeyMap[ImGuiKey_PageUp] = GLFW_KEY_PAGE_UP;
+//        io.KeyMap[ImGuiKey_PageDown] = GLFW_KEY_PAGE_DOWN;
+//        io.KeyMap[ImGuiKey_Home] = GLFW_KEY_HOME;
+//        io.KeyMap[ImGuiKey_End] = GLFW_KEY_END;
+//        io.KeyMap[ImGuiKey_Insert] = GLFW_KEY_INSERT;
+//        io.KeyMap[ImGuiKey_Delete] = GLFW_KEY_DELETE;
+//        io.KeyMap[ImGuiKey_Backspace] = GLFW_KEY_BACKSPACE;
+//        io.KeyMap[ImGuiKey_Space] = GLFW_KEY_SPACE;
+//        io.KeyMap[ImGuiKey_Enter] = GLFW_KEY_ENTER;
+//        io.KeyMap[ImGuiKey_Escape] = GLFW_KEY_ESCAPE;
+//        io.KeyMap[ImGuiKey_KeyPadEnter] = GLFW_KEY_KP_ENTER;
+//        io.KeyMap[ImGuiKey_A] = GLFW_KEY_A;
+//        io.KeyMap[ImGuiKey_C] = GLFW_KEY_C;
+//        io.KeyMap[ImGuiKey_V] = GLFW_KEY_V;
+//        io.KeyMap[ImGuiKey_X] = GLFW_KEY_X;
+//        io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
+//        io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
         ImGui_ImplOpenGL3_Init("#version 410");
-        this->subscribe_to(MOUSE_BUTTON_EVENT, &on_mouse_button_event);
-        this->subscribe_to(MOUSE_SCROLL_EVENT, &on_mouse_scroll_event);
-        this->subscribe_to(MOUSE_CURSOR_POS_EVENT, &on_mouse_cursor_event);
-        this->subscribe_to(KEYBOARD_KEY_EVENT, &on_key_event);
-        this->subscribe_to(KEYBOARD_CHAR_EVENT, &on_char_event);
-        this->subscribe_to(WINDOW_RESIZE_EVENT, &on_window_resize);
+//        this->subscribe_to(MOUSE_BUTTON_EVENT, &on_mouse_button_event);
+//        this->subscribe_to(MOUSE_SCROLL_EVENT, &on_mouse_scroll_event);
+//        this->subscribe_to(MOUSE_CURSOR_POS_EVENT, &on_mouse_cursor_event);
+//        this->subscribe_to(KEYBOARD_KEY_EVENT, &on_key_event);
+//        this->subscribe_to(KEYBOARD_CHAR_EVENT, &on_char_event);
+//        this->subscribe_to(WINDOW_RESIZE_EVENT, &on_window_resize);
 
     }
 
     void ImGui_layer::on_detach() {
-        // TODO Implement detach.
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
     }
 
-    void ImGui_layer::on_update() {
-        Application_layer_st::on_update();
+//    void ImGui_layer::on_update() {
+//        Application_layer_st::on_update();
+//
+//        ImGuiIO& io = ImGui::GetIO();
+//        Application& app = Application::get();
+//        io.DisplaySize = ImVec2(app.get_window().get_width(), app.get_window().get_height());
+//
+//        float time = (float)glfwGetTime();
+//        io.DeltaTime = this->m_time > 0.0f ? (time - this->m_time) : (1.0f / 60.0f);
+//        this->m_time = time;
+//
+//        ImGui_ImplOpenGL3_NewFrame();
+//        ImGui::NewFrame();
+//
+//        static bool show = true;
+//        ImGui::ShowDemoWindow(&show);
+//
+//        ImGui::Render();
+//        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+//    }
 
+    void ImGui_layer::begin() {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+    }
+
+    void ImGui_layer::end() {
         ImGuiIO& io = ImGui::GetIO();
         Application& app = Application::get();
         io.DisplaySize = ImVec2(app.get_window().get_width(), app.get_window().get_height());
 
-        float time = (float)glfwGetTime();
-        io.DeltaTime = this->m_time > 0.0f ? (time - this->m_time) : (1.0f / 60.0f);
-        this->m_time = time;
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui::NewFrame();
-
-        static bool show = true;
-        ImGui::ShowDemoWindow(&show);
-
+        /// Rendering
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
@@ -148,5 +200,10 @@ namespace Cecilion {
 
     ImGui_layer::~ImGui_layer() {
 
+    }
+
+    void ImGui_layer::on_imgui_render() {
+        static bool show = true;
+        ImGui::ShowDemoWindow(&show);
     }
 }

@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "Event/I_Event_actor.h"
 #include "Layers/Layer_stack.h"
+#include <ImGui/ImGui_layer.h>
 namespace Cecilion {
     class Application : public I_Event_actor {
     public:
@@ -19,6 +20,7 @@ namespace Cecilion {
         void push_overlay(const std::shared_ptr<Application_layer>& layer);
         void pop_overlay(const std::shared_ptr<Application_layer>& layer);
     private:
+        std::shared_ptr<ImGui_layer> m_imgui_layer;
         Window* m_window;
         bool m_running = true;
         Layer_stack* application_layers;

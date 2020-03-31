@@ -23,6 +23,8 @@ namespace Cecilion {
         this->m_window = Window::create_window();
         this->subscribe_to(WINDOW_CLOSE_EVENT, &Cecilion::Application::window_close_callback);
         this->application_layers = new Layer_stack();
+        this->m_imgui_layer = std::make_shared<ImGui_layer>();
+        this->push_overlay(this->m_imgui_layer);
     }
 
     Application::~Application() {
@@ -34,6 +36,11 @@ namespace Cecilion {
             glClear(GL_COLOR_BUFFER_BIT);
             glClearColor(1,1,0,1);
             this->application_layers->on_update();
+
+            this->m_imgui_layer->begin();
+            this->application_layers->on_imgui_render();
+            this->m_imgui_layer->end();
+
             this->m_window->on_update();
         }
     }

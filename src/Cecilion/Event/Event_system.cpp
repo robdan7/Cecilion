@@ -82,7 +82,7 @@ namespace Cecilion {
             }
 
         }
-        CORE_LOG_WARN("No actor is currently listening to message ID  " + std::to_string(event->message_ID));
+        CORE_LOG_TRACE("No actor is currently listening to message ID  " + std::to_string(event->message_ID));
         actor_list_m.unlock();
     }
 

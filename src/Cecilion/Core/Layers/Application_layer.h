@@ -12,6 +12,7 @@ namespace Cecilion {
         virtual void on_attach() = 0;
         virtual void on_detach() = 0;
         virtual void on_update() = 0;
+        virtual void on_imgui_render() {}
         virtual void dispatch(std::shared_ptr<Event_message> event) = 0;
         virtual void set_previous(Application_layer* previous) = 0;
         virtual void subscribe_to(unsigned int message_ID, I_Event_inbox::Event_callback callback) = 0;

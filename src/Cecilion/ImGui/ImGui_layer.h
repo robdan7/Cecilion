@@ -8,7 +8,11 @@ namespace Cecilion {
         ~ImGui_layer() override;
         void on_attach() override;
         void on_detach() override;
-        void on_update() override;
+//        void on_update() override;
+        void on_imgui_render() override;
+
+        void begin();
+        void end();
     private:
 
         float m_time = 0.0f;
