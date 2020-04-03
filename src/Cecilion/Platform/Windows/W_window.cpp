@@ -8,8 +8,8 @@ namespace Cecilion {
     #define get_GLFW_window(window) (W_window*)glfwGetWindowUserPointer(window)
     static bool s_GLFW_initialized = false;
 
-    W_window::W_window( const Window_properties &properties) {
-        Init(properties);
+    W_window::W_window( const Window_properties &properties, GLFW_context* context) {
+        Init(properties, context);
     }
 
     W_window::~W_window() {
@@ -20,7 +20,8 @@ namespace Cecilion {
 
     }
 
-    void W_window::Init(const Window_properties &properties) {
+    void W_window::Init(const Window_properties &properties, GLFW_context* context) {
+        this->m_graphics_context = context;
         this->m_data = new Window_data();
         this->m_data->title = properties.title;
         this->m_data->height = properties.height;
@@ -40,17 +41,14 @@ namespace Cecilion {
                 (int)this->m_data->height,
                 this->m_data->title.c_str(),
                 NULL, NULL);
-        glfwMakeContextCurrent(this->m_window);
+
+        this->m_graphics_context->init(this->m_window);
+//        glfwMakeContextCurrent(this->m_window);
+
+//        GLenum glew_success = glewInit();
+//        CORE_ASSERT(glew_success, "GLEW Error: No GLFW context found!");
+
         glfwSetWindowUserPointer(this->m_window, this);
-
-        glfwMakeContextCurrent(this->m_window);
-
-
-        if (s_GLFW_initialized) {
-            GLenum glew_success = glewInit();
-            CORE_ASSERT(glew_success, "GLEW Error: No GLFW context found!")
-        }
-
         this->set_Vsync(this->m_data->vsync);
 
         /// Send a shutdown event when the user tries to close the window.
@@ -111,7 +109,9 @@ namespace Cecilion {
         //glClear(GL_COLOR_BUFFER_BIT);
         //glClearColor(1,1,0,1);
         glfwPollEvents();
-        glfwSwapBuffers(this->m_window);
+        // TODO Render context.
+        this->m_graphics_context->swap_buffers();
+        //glfwSwapBuffers(this->m_window);
     }
 
     void W_window::shutdown() {

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Platform/Platform.h"
+#include <Platform/Platform.h>
 #include <string>
+#include <Renderer/GLFW_context.h>
 
 namespace Cecilion {
     /**
@@ -17,8 +18,9 @@ namespace Cecilion {
         Window_properties(
                 const std::string &title = "Cecilion engine",
                 unsigned int width = 1280,
-                unsigned int height = 720) :
-                title(title), width(width), height(height){}
+                unsigned int height = 720,
+                GLFW_context* context = nullptr) :
+                title(title), width(width), height(height) {}
     };
 
     /**
@@ -32,7 +34,7 @@ namespace Cecilion {
         virtual unsigned int get_width() const = 0;
         virtual void set_Vsync(bool vsync) = 0;
         virtual bool has_Vsync() const = 0;
-        static Window* create_window(const Window_properties& properties = Window_properties());
+        static Window* create_window(Window_properties properties = Window_properties());
         virtual void* get_native_window() = 0;
     };
 }

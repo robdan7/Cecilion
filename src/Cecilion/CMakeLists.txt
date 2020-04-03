@@ -4,6 +4,7 @@ add_subdirectory(Platform)
 add_subdirectory(Core)
 add_subdirectory(Event)
 add_subdirectory(ImGui)
+add_subdirectory(Renderer)
 
 
 add_library(Cecilion STATIC "")
