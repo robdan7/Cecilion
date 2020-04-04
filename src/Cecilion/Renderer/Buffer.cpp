@@ -15,13 +15,13 @@ namespace Cecilion {
         return nullptr;
     }
 
-    Index_buffer *Cecilion::Index_buffer::Create(uint32_t *indices, uint32_t size) {
+    Index_buffer *Cecilion::Index_buffer::Create(uint32_t *indices, uint32_t count) {
         switch (Renderer::get_API()) {
             case Renderer_API::None :
                 CORE_ASSERT(false, "Renderer_API:: No render API is defined!");
                 break;
             case Renderer_API::OpenGL:
-                return new GL_index_buffer(indices, size);
+                return new GL_index_buffer(indices, count);
         }
         CORE_ASSERT(false, "Unknown Renderer_API!");
         return nullptr;

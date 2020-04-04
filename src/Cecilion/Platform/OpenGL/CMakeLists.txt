@@ -17,9 +17,10 @@ add_library(GL_shaders STATIC GL_shader.cpp)
 target_link_libraries(GL_shaders PRIVATE Cecilion_Log OpenGL)
 target_include_directories(GL_shaders PRIVATE ${CECILION_HEADER})
 
-add_library(GL_buffers STATIC GL_buffer.cpp)
+add_library(GL_buffers STATIC GL_buffer.cpp GL_vertex_array.cpp)
 target_link_libraries(GL_buffers PRIVATE Cecilion_Log OpenGL)
 target_include_directories(GL_buffers PRIVATE ${CECILION_HEADER})
+
 
 #target_include_directories(OpenGL INTERFACE ${CECILION_HEADER})
 #target_precompile_headers(OpenGL INTERFACE ${PROJECT_SOURCE_DIR}/include/glfw-3.3.2x86/include/GLFW/glfw3.h ${PROJECT_SOURCE_DIR}/include/glew-2.1.0/include/GL/glew.h)

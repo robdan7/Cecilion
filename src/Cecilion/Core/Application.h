@@ -8,6 +8,7 @@
 #include <Platform/OpenGL/GL_shader.h>
 #include <Platform/OpenGL/GL_buffer.h>
 #include <Renderer/Buffer.h>
+#include <Renderer/Vertex_array.h>
 namespace Cecilion {
     class Application : public I_Event_actor {
     public:
@@ -29,9 +30,9 @@ namespace Cecilion {
         Layer_stack* application_layers;
         static Application* s_instance;
         std::unique_ptr<GL_shader> m_shader;
-        Vertex_buffer* m_vertex_buffer;
-        Index_buffer* m_index_buffer;
-        unsigned int m_vertex_array;
+//        std::shared_ptr<Vertex_buffer> m_vertex_buffer;
+//        std::shared_ptr<Index_buffer> m_index_buffer;
+        std::shared_ptr<Vertex_array> m_vertex_array;
     };
 
     // To be defined in client

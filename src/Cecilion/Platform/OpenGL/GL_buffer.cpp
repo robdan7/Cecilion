@@ -10,8 +10,9 @@ namespace Cecilion {
 
     GL_vertex_buffer::GL_vertex_buffer(float *vertices, uint32_t size) {
         glCreateBuffers(1, &this->m_buffer_ID);
-        this->bind();
+        glBindBuffer(GL_ARRAY_BUFFER, reinterpret_cast<GLuint>(&this->m_buffer_ID));
         glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
     void GL_vertex_buffer::bind() {
@@ -26,7 +27,6 @@ namespace Cecilion {
     GL_vertex_buffer::~GL_vertex_buffer() {
         glDeleteBuffers(1, &this->m_buffer_ID);
     }
-
 
     /// -------------- Index buffer --------------
 

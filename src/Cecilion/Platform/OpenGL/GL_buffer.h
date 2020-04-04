@@ -8,7 +8,12 @@ namespace Cecilion {
         ~GL_vertex_buffer() override;
         void bind() override;
         void unbind() override;
+
+        void set_layout(const Buffer_layout &layout) override {this->m_layout = layout;}
+        Buffer_layout &get_layout() override {return this->m_layout;}
+
     private:
+        Buffer_layout m_layout;
         uint32_t m_buffer_ID;
     };
 
