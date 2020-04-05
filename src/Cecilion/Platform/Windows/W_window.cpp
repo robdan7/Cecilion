@@ -100,7 +100,12 @@ namespace Cecilion {
     }
 
     void W_window::set_Vsync(bool vsync) {
-        // TODO enable VSYNC
+        if (vsync) {
+            glfwSwapInterval(1);
+        } else {
+            glfwSwapInterval(0);
+        }
+        this->m_data->vsync = vsync;
     }
 
     bool W_window::has_Vsync() const {
