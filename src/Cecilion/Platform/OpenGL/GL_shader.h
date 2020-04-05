@@ -1,4 +1,10 @@
 #pragma once
+#include <cstdint>
+#include <string>
+#include <vector>
+#define OPENGL_VERTEX_SHADER (35633)
+#define OPENGL_FRAGMENT_SHADER (35632)
+// TODO these defines wont be needed if shaders are compiled from assets.
 namespace Cecilion {
     class GL_shader;
 

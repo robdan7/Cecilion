@@ -1,13 +1,14 @@
 #pragma once
+
+#include "Renderer_API.h"
 namespace Cecilion {
-    enum class Renderer_API {
-        None = 0, OpenGL = 1
-    };
 
     class Renderer {
     public:
-        inline static Renderer_API get_API() {return s_renderer_API;}
-        static Renderer_API s_renderer_API;
+        static void begin_scene();
+        static void end_scene();
+        static void submit(const std::shared_ptr<Vertex_array>& vertex_array);
+        inline static Renderer_API::API get_API() {return Renderer_API::get_API();}
     };
 }
 

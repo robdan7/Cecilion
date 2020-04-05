@@ -3,7 +3,8 @@
 #include "Application.h"
 #include "Log.h"
 #include <Event/Async_inbox.h>
-#include <Platform/OpenGL/OpenGL.h>
+#include <Renderer/Render_command.h>
+#include <Renderer/Renderer.h>
 //#include <Renderer/Buffer.h>
 #include "Input.h"
 
@@ -28,7 +29,7 @@ namespace Cecilion {
         this->m_imgui_layer = std::make_shared<ImGui_layer>();
         this->push_overlay(this->m_imgui_layer);
 
-        uint32_t vert = GL_shader::create_shader(GL_VERTEX_SHADER, R"(
+        uint32_t vert = GL_shader::create_shader(OPENGL_VERTEX_SHADER, R"(
             #version 450 core
             layout(location = 0) in vec3 in_position;
             layout(location = 1) in vec4 in_color;
@@ -44,7 +45,7 @@ namespace Cecilion {
                 gl_Position = vec4(out_position, 1);
             }
             )");
-        uint32_t frag = GL_shader::create_shader(GL_FRAGMENT_SHADER, R"(
+        uint32_t frag = GL_shader::create_shader(OPENGL_FRAGMENT_SHADER, R"(
             #version 450 core
             in vec4 frag_color;
             layout(location = 0) out vec4 color;
@@ -58,6 +59,9 @@ namespace Cecilion {
         m_shader->attach_shader(vert);
         m_shader->attach_shader(frag);
         m_shader->link();
+        GL_shader::delete_shader(vert);
+        GL_shader::delete_shader(frag);
+
 //
 ////        glGenVertexArrays(1, &this->m_vertex_array);
 ////        glBindVertexArray(this->m_vertex_array);
@@ -98,24 +102,14 @@ namespace Cecilion {
     void Application::run() {
 
         while (this->m_running) {
-            glClear(GL_COLOR_BUFFER_BIT);
-            glClearColor(0.2,0.2,0.2,1);
+            Render_command::set_clear_color({0.2f,0.2f,0.2f,1.0f});
+            Render_command::clear();
 
+            Renderer::begin_scene();
             this->m_shader->bind();
-//            glBegin(GL_TRIANGLES);
-//            glVertex3f(-0.5,-0.5,0);
-//            glVertex3f(0.5,-0.5,0);
-//            glVertex3f(0,0.5,0);
-//            glEnd();
-
-            m_vertex_array->bind();
-            glDrawElements(GL_TRIANGLES, this->m_vertex_array->get_index_buffer()->get_count(), GL_UNSIGNED_INT, nullptr);
-            m_vertex_array->unbind();
-
-//            glBindVertexArray(this->m_vertex_array);
-//            glDrawElements(GL_TRIANGLES, this->m_index_buffer->get_count(), GL_UNSIGNED_INT, nullptr);
-//            glBindVertexArray(0);
+            Renderer::submit(this->m_vertex_array);
             this->m_shader->unbind();
+            Renderer::end_scene();
 
             this->application_layers->on_update();
 

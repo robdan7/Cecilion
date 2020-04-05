@@ -22,6 +22,6 @@ target_include_directories(Windows_library PRIVATE ${CECILION_HEADER})
 #target_include_directories(Windows_library PUBLIC ${PROJECT_SOURCE_DIR}/include/glew-2.1.0/include)
 
 #target_link_libraries(Windows_library PUBLIC glfw3  glew32s gdi32  opengl32 PRIVATE Cecilion_Log)
-target_link_libraries(Windows_library PRIVATE Cecilion_Log OpenGL Cecilion_input)
+target_link_libraries(Windows_library PRIVATE Cecilion_Log OpenGL_glew Cecilion_input)
 target_precompile_headers(Windows_library PUBLIC W_window.h)
 
