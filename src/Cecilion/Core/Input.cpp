@@ -3,6 +3,8 @@
 //
 
 #include "Input.h"
+//#include "Keycodes.h"
+//#include "Mouse_button_codes.h"
 #include <Event/Event_system.h>
 namespace Cecilion {
     /**
@@ -11,10 +13,7 @@ namespace Cecilion {
   * @param action
   */
     void Input::notify_key_status(int keycode, int action) {
-        if (keycodes[keycode] != action) {
-            Event_system::post(std::make_shared<Cecilion::Keyboard_key_Event>(keycode,action));
-            keycodes[keycode] = action;
-        }
+        Event_system::post(std::make_shared<Cecilion::Keyboard_key_Event>(keycode,action));
     }
 
 /**
@@ -40,10 +39,7 @@ namespace Cecilion {
  * @param button
  */
     void Input::notify_mouse_button(int button, int action) {
-        if (mouse_buttons[button] != action) {
             Event_system::post(std::make_shared<Cecilion::Mouse_button_Event>(button, action));
-            mouse_buttons[button] = action;
-        }
     }
 
 /**

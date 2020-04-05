@@ -29,69 +29,6 @@ namespace Cecilion {
         this->m_imgui_layer = std::make_shared<ImGui_layer>();
         this->push_overlay(this->m_imgui_layer);
 
-        uint32_t vert = GL_shader::create_shader(OPENGL_VERTEX_SHADER, R"(
-            #version 450 core
-            layout(location = 0) in vec3 in_position;
-            layout(location = 1) in vec4 in_color;
-
-            out vec3 out_position;
-            out vec4 frag_color;
-
-
-
-            void main() {
-                frag_color = in_color;
-                out_position = in_position;
-                gl_Position = vec4(out_position, 1);
-            }
-            )");
-        uint32_t frag = GL_shader::create_shader(OPENGL_FRAGMENT_SHADER, R"(
-            #version 450 core
-            in vec4 frag_color;
-            layout(location = 0) out vec4 color;
-
-            void main() {
-                color =vec4(0.8, 0.3, 0.3, 1.0);
-                color = frag_color;
-            }
-            )");
-        this->m_shader = std::make_unique<GL_shader>();
-        m_shader->attach_shader(vert);
-        m_shader->attach_shader(frag);
-        m_shader->link();
-        GL_shader::delete_shader(vert);
-        GL_shader::delete_shader(frag);
-
-//
-////        glGenVertexArrays(1, &this->m_vertex_array);
-////        glBindVertexArray(this->m_vertex_array);
-
-
-
-        float vertices[4 * (3 + 4)] = {
-                -0.5f, -0.5f, 0.0f, 0.8, 0.3, 0.3, 1.0,
-                0.5f, -0.5f, 0.0f, 0.3, 0.8, 0.3, 1.0,
-                0.5f, 0.5f, 0.0f, 0.3, 0.3, 0.8, 1.0,
-                -0.5f, 0.5f, 0.0f, 0.3, 0.3, 0.8, 1.0
-        };
-        std::shared_ptr<Vertex_buffer> vertex_buffer;
-        vertex_buffer.reset(Vertex_buffer::Create(vertices, sizeof(vertices)));
-        {
-            Cecilion::Buffer_layout layout = {
-                    {Shader_data::Float3, "position"},
-                    {Shader_data::Float4, "color"}
-            };
-            vertex_buffer->set_layout(layout);
-        }
-
-        this->m_vertex_array.reset(Vertex_array::Create());
-        this->m_vertex_array->add_vertex_buffer(vertex_buffer);
-//
-//
-        uint32_t indices[6] = {0,1,2,0,2,3};
-        std::shared_ptr<Index_buffer> index_buffer;
-        index_buffer.reset(Index_buffer::Create(indices, 6));
-        this->m_vertex_array->set_index_buffer(index_buffer);
 
         //this->m_shader.reset();
     }
@@ -102,15 +39,6 @@ namespace Cecilion {
     void Application::run() {
 
         while (this->m_running) {
-            Render_command::set_clear_color({0.2f,0.2f,0.2f,1.0f});
-            Render_command::clear();
-
-            Renderer::begin_scene();
-            this->m_shader->bind();
-            Renderer::submit(this->m_vertex_array);
-            this->m_shader->unbind();
-            Renderer::end_scene();
-
             this->application_layers->on_update();
 
             this->m_imgui_layer->begin();

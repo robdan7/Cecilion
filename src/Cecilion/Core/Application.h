@@ -29,10 +29,7 @@ namespace Cecilion {
         bool m_running = true;
         Layer_stack* application_layers;
         static Application* s_instance;
-        std::unique_ptr<GL_shader> m_shader;
-//        std::shared_ptr<Vertex_buffer> m_vertex_buffer;
-//        std::shared_ptr<Index_buffer> m_index_buffer;
-        std::shared_ptr<Vertex_array> m_vertex_array;
+
     };
 
     // To be defined in client

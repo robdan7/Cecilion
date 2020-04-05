@@ -29,8 +29,6 @@ namespace Cecilion {
         virtual std::pair<float, float> get_mouse_pos_position() = 0;
     private:
         // TODO Implement keycodes.
-        static int keycodes[100];
-        static int mouse_buttons[100];
         static Input* s_instance;
     };
 }
