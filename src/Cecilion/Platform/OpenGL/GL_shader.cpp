@@ -6,14 +6,16 @@
 namespace Cecilion {
 
 
-    GL_shader::GL_shader() {
-        this->m_renderID = glCreateProgram();
+    GL_shader::GL_shader() : m_renderID(glCreateProgram()){
+        this->attached_shaders = new std::vector<uint32_t>();
+//        this->m_renderID = glCreateProgram();
     }
 
 
 
 
     GL_shader::~GL_shader() {
+        delete this->attached_shaders;
         glDeleteProgram(this->m_renderID);
     }
 
@@ -34,11 +36,11 @@ namespace Cecilion {
      */
     void GL_shader::attach_shader(const uint32_t& shader) {
         CORE_ASSERT(!this->linked, "Cannot attach shader to linked shader program!");
-        this->attached_shaders.push_back(shader);
+        this->attached_shaders->push_back(shader);
     }
 
     void GL_shader::link() {
-        for (uint32_t shader: this->attached_shaders) {
+        for (uint32_t shader: *this->attached_shaders) {
             glAttachShader(this->m_renderID, shader);
         }
         glLinkProgram(m_renderID);
@@ -59,15 +61,18 @@ namespace Cecilion {
             //glDeleteShader(vertexShader);
             //glDeleteShader(fragmentShader);
 
-            CORE_LOG_ERROR("Shader program compilation failed! \n    Info: {0}", infoLog.data());
+            // TODO Fix proper error callback. The previous version didn't work.
+            CORE_LOG_ERROR("Shader program {0} compilation failed! \n", this->m_renderID);
+//            CORE_LOG_ERROR("Info:    {0}", infoLog.data());
             return;
         }
 
-        for (uint32_t shader: this->attached_shaders) {
+        for (uint32_t shader: *this->attached_shaders) {
             glDetachShader(this->m_renderID, shader);
         }
-        this->attached_shaders.clear();
+        this->attached_shaders->clear();
         this->linked = true;
+//        CORE_LOG_INFO("linked shader {0}", this->m_renderID);
     }
 
     uint32_t GL_shader::create_shader(const uint32_t shader_type, const std::string &shader_source) {

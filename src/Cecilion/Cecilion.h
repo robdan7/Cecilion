@@ -13,6 +13,9 @@
 #include "Renderer/Buffer.h"
 #include "Renderer/Vertex_array.h"
 #include "Renderer/Camera.h"
+
+#include "ECS/Filter.h"
+#include "ECS/ECS.h"
 //#include "Event/Event_system.h"
 //#include "Event/I_Event_actor.h"
 

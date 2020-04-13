@@ -1,2 +1,1 @@
-add_library(Cecilion_Utils STATIC "")
-target_sources(Cecilion_Utils PUBLIC Semaphore.cpp)
+add_library(Cecilion_Utils STATIC Semaphore.cpp)

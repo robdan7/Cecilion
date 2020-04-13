@@ -1,8 +1,13 @@
 #include <iostream>
 #include <utility>
 #include <Cecilion.h>
+#include <bitset>
+#include <vector>
+#include <typeinfo>
+#include <Utils/Sparse_set.h>
 
-    struct demo: Cecilion::Event_message {
+
+struct demo: Cecilion::Event_message {
         string message;
         explicit demo(string message) : Event_message(Cecilion::SYSTEM_STARTUP_EVENT) { this->message = std::move(message);}
         ~demo() override = default;
@@ -39,9 +44,14 @@ public:
     }
 };
 
+struct Render_object {
+    Cecilion::GL_shader* m_shader;
+    std::shared_ptr<Cecilion::Vertex_array> m_vertex_array;
+};
+
 class Example_layer : public Cecilion::Application_layer_st {
 public:
-    Example_layer() {
+    Example_layer(): filter(Cecilion::ECS::get_filter<Render_object>()){
         uint32_t vert = Cecilion::GL_shader::create_shader(OPENGL_VERTEX_SHADER, R"(
             #version 450 core
             layout(location = 0) in vec3 in_position;
@@ -68,7 +78,7 @@ public:
                 color = frag_color;
             }
             )");
-        this->m_shader = std::make_unique<Cecilion::GL_shader>();
+        this->m_shader = new Cecilion::GL_shader();
         m_shader->attach_shader(vert);
         m_shader->attach_shader(frag);
         m_shader->link();
@@ -76,20 +86,20 @@ public:
         Cecilion::GL_shader::delete_shader(frag);
 
         float vertices[4 * (3 + 4)] = {
-                -0.5f, -0.5f, 0.0f, 0.8, 0.3, 0.3, 1.0,
-                0.5f, -0.5f, 0.0f, 0.3, 0.8, 0.3, 1.0,
-                0.5f, 0.5f, 0.0f, 0.3, 0.3, 0.8, 1.0,
-                -0.5f, 0.5f, 0.0f, 0.3, 0.3, 0.8, 1.0
+                -0.5f, -1.0f, 0.0f, 0.8, 0.3, 0.3, 1.0,
+                0.5f, -1.0f, 0.0f, 0.3, 0.8, 0.3, 1.0,
+                0.5f, 0.0f, 0.0f, 0.3, 0.3, 0.8, 1.0,
+                -0.5f, 0.0f, 0.0f, 0.3, 0.3, 0.8, 1.0
         };
         std::shared_ptr<Cecilion::Vertex_buffer> vertex_buffer;
         vertex_buffer.reset(Cecilion::Vertex_buffer::Create(vertices, sizeof(vertices)));
-        {
-            Cecilion::Buffer_layout layout = {
-                    {Cecilion::Shader_data::Float3, "position"},
-                    {Cecilion::Shader_data::Float4, "color"}
-            };
-            vertex_buffer->set_layout(layout);
-        }
+
+        Cecilion::Buffer_layout layout = {
+                {Cecilion::Shader_data::Float3, "position"},
+                {Cecilion::Shader_data::Float4, "color"}
+        };
+        vertex_buffer->set_layout(layout);
+
 
         this->m_vertex_array.reset(Cecilion::Vertex_array::Create());
         this->m_vertex_array->add_vertex_buffer(vertex_buffer);
@@ -98,27 +108,65 @@ public:
         std::shared_ptr<Cecilion::Index_buffer> index_buffer;
         index_buffer.reset(Cecilion::Index_buffer::Create(indices, 6));
         this->m_vertex_array->set_index_buffer(index_buffer);
+
+        auto entity = Cecilion::ECS::create_entity();
+        Cecilion::ECS::add_component<Render_object>(entity, this->m_shader, this->m_vertex_array);
+
+        float vertices2[4 * (3 + 4)] = {
+                0.1f, 0.1f, 0.0f, 0.8, 0.3, 0.3, 1.0,
+                0.5f, 0.1f, 0.0f, 0.3, 0.8, 0.3, 1.0,
+                .5f, 0.5f, 0.0f, 0.3, 0.3, 0.8, 1.0,
+                0.1f, 0.5f, 0.0f, 0.3, 0.3, 0.8, 1.0
+        };
+
+        std::shared_ptr<Cecilion::Vertex_buffer> buffer2;
+        buffer2.reset(Cecilion::Vertex_buffer::Create(vertices2, sizeof(vertices2)));
+
+        Cecilion::Buffer_layout layout2 = {
+                {Cecilion::Shader_data::Float3, "position"},
+                {Cecilion::Shader_data::Float4, "color"}
+        };
+        buffer2->set_layout(layout2);
+
+        std::shared_ptr<Cecilion::Vertex_array> array2;
+        array2.reset(Cecilion::Vertex_array::Create());
+        array2->add_vertex_buffer(buffer2);
+
+        std::shared_ptr<Cecilion::Index_buffer> index2;
+        index2.reset(Cecilion::Index_buffer::Create(indices, 6));
+        array2->set_index_buffer(index2);
+
+        auto entity2 = Cecilion::ECS::create_entity();
+        Cecilion::ECS::add_component<Render_object>(entity2, this->m_shader, array2);
+
     }
     void on_update() override {
         Application_layer_st::on_update();
-
         Cecilion::Render_command::set_clear_color({0.2f,0.2f,0.2f,1.0f});
         Cecilion::Render_command::clear();
 
         Cecilion::Renderer::begin_scene();
-        this->m_shader->bind();
-        Cecilion::Renderer::submit(this->m_vertex_array);
-        this->m_shader->unbind();
+        this->filter.for_each_compact([](Render_object& arg){
+            arg.m_shader->bind();
+
+
+            Cecilion::Renderer::submit(arg.m_vertex_array);
+            arg.m_shader->unbind();
+        });
         Cecilion::Renderer::end_scene();
+
     }
 
     ~Example_layer() override {
 
     }
 private:
-    std::unique_ptr<Cecilion::GL_shader> m_shader;
+    Cecilion::Filter<Render_object> filter;
+    Cecilion::GL_shader* m_shader;
     std::shared_ptr<Cecilion::Vertex_array> m_vertex_array;
 };
+
+
 
 class App : public Cecilion::Application {
 public :
@@ -150,6 +198,18 @@ public :
 
 
 Cecilion::Application* Cecilion::CreateApplication() {
+
+    /// How to iterate through components:
+    /**
+     * Components are stored in pages. Each page can either exist or not exist.
+     *
+     * 0: get an iterator for the SMALLEST set of pages.
+     *
+     * 1: Check if all component containers has the given page. Otherwise continue.
+     *
+     * 2: For each index of all the arrays, check if it exists in ALL of them (do a conjunction on has_ID)
+     * 3: If it does, call the function with the element at iterator index
+     */
     LOG_INFO("Sandbox says hello!");
     return new App();
 }

@@ -17,6 +17,4 @@ namespace Cecilion {
         GLenum glew_success = glewInit();
         CORE_ASSERT(glew_success, "GLEW Error: No GLFW context found!");
     }
-
-
 }

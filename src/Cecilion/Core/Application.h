@@ -13,7 +13,7 @@ namespace Cecilion {
     class Application : public I_Event_actor {
     public:
         Application();
-        virtual ~Application();
+        virtual ~Application() = 0;
         void run();
         static void window_close_callback(std::shared_ptr<I_Event_actor> actor, Event_message* message);
         void shutdown();
