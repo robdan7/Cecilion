@@ -12,8 +12,8 @@ namespace Cecilion {
         Buffered_inbox(std::shared_ptr<I_Event_actor> event_parent);
         ~Buffered_inbox();
         void send_to_inbox(std::shared_ptr<Event_message> event, Event_callback callback) override ;
-        void subscribe_to(int message_ID, Event_callback callback) override;
-        void unsubscribe(int message_ID) override;
+        void subscribe_to(std::type_index message_ID, Event_callback callback) override;
+        void unsubscribe(std::type_index message_ID) override;
         void unsubscribe_all();
         void execute_inbox();
     private:
@@ -25,8 +25,8 @@ namespace Cecilion {
             }
         };
         std::mutex message_stack_m;
-        std::list<int> subscribed_messages;
-        std::list<Buffered_event>* p_message_stack;
+        std::list<std::type_index> subscribed_messages;
+        std::list<Buffered_event> p_message_stack;
     };
 }
 

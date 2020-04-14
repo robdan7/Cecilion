@@ -13,7 +13,7 @@ namespace Cecilion {
   * @param action
   */
     void Input::notify_key_status(int keycode, int action) {
-        Event_system::post(std::make_shared<Cecilion::Keyboard_key_Event>(keycode,action));
+        Event_system::post<Cecilion::Keyboard_key_Event>(keycode,action);
     }
 
 /**
@@ -22,7 +22,7 @@ namespace Cecilion {
  * @param keycode
  */
     void Input::notify_char_status(int keycode) {
-        Event_system::post(std::make_shared<Keyboard_char_event>(keycode));
+        Event_system::post<Keyboard_char_event>(keycode);
     }
 
 /**
@@ -31,7 +31,7 @@ namespace Cecilion {
  * @param y
  */
     void Input::notify_mouse_pos(double x, double y) {
-        Event_system::post(std::make_shared<Cecilion::Mouse_cursor_Event>(x, y));
+        Event_system::post<Cecilion::Mouse_cursor_Event>(x, y);
     }
 
 /**
@@ -39,7 +39,7 @@ namespace Cecilion {
  * @param button
  */
     void Input::notify_mouse_button(int button, int action) {
-            Event_system::post(std::make_shared<Cecilion::Mouse_button_Event>(button, action));
+            Event_system::post<Cecilion::Mouse_button_Event>(button, action);
     }
 
 /**
@@ -48,7 +48,7 @@ namespace Cecilion {
  * @param y_offset
  */
     void Input::notify_mouse_scroll(double x_offset, double y_offset) {
-        Event_system::post(std::make_shared<Cecilion::Mouse_scroll_Event>(x_offset, y_offset));
+        Event_system::post<Cecilion::Mouse_scroll_Event>(x_offset, y_offset);
     }
 
 // TODO Implement support for generic controllers. This should not be different from mouse input.

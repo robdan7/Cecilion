@@ -26,9 +26,8 @@ namespace Cecilion {
     protected:
         std::shared_ptr<I_Event_inbox> actor_inbox;
         I_Event_actor(std::string name);
-        //I_Event_actor(std::string name, I_Event_inbox* inbox);
-        virtual void subscribe_to(unsigned int message_ID, I_Event_inbox::Event_callback callback);
-        virtual void unsubscribe(unsigned int message_ID);
+        virtual void subscribe_to(std::type_index message_ID, I_Event_inbox::Event_callback callback);
+        virtual void unsubscribe(std::type_index message_ID);
     };
 }
 

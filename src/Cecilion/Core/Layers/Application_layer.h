@@ -3,6 +3,10 @@
 #include <Event/I_Event_actor.h>
 
 namespace Cecilion {
+
+    /**
+     * Interface class for Application layers.
+     */
     class Layer_stack;
     class Application_layer : public I_Event_actor {
     public:
@@ -15,7 +19,7 @@ namespace Cecilion {
         virtual void on_imgui_render() {}
         virtual void dispatch(std::shared_ptr<Event_message> event) = 0;
         virtual void set_previous(Application_layer* previous) = 0;
-        virtual void subscribe_to(unsigned int message_ID, I_Event_inbox::Event_callback callback) = 0;
-        virtual void unsubscribe(unsigned int message_ID) = 0;
+        virtual void subscribe_to(std::type_index message_ID, I_Event_inbox::Event_callback callback) = 0;
+        virtual void unsubscribe(std::type_index message_ID) = 0;
     };
 }

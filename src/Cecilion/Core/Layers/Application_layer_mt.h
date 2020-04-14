@@ -15,8 +15,8 @@ namespace Cecilion {
         void on_update() override {};
         void dispatch(std::shared_ptr<Event_message> event) override;
         void set_previous(Application_layer* previous) override;
-        void subscribe_to(unsigned int message_ID, I_Event_inbox::Event_callback callback) override;
-        void unsubscribe(unsigned int message_ID) override;
+        void subscribe_to(std::type_index message_ID, I_Event_inbox::Event_callback callback) override;
+        void unsubscribe(std::type_index message_ID) override;
     protected:
         /**
          * This is an event actor AND has an event container. I know.
@@ -25,7 +25,7 @@ namespace Cecilion {
          * while The actor inbox is sort of in another context. There is also no rule that says the inbox
          * should know what events will trigger certain functions.
          */
-        std::map<unsigned int, Inbox_entry*> inbox_entries;
+        std::unordered_map<std::type_index, Inbox_entry*> inbox_entries;
         std::mutex inbox_m;
         Application_layer* previous;
 

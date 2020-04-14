@@ -7,13 +7,6 @@
 #include <Utils/Sparse_set.h>
 
 
-struct demo: Cecilion::Event_message {
-        string message;
-        explicit demo(string message) : Event_message(Cecilion::SYSTEM_STARTUP_EVENT) { this->message = std::move(message);}
-        ~demo() override = default;
-        //[[nodiscard]] virtual demo* clone() const {return new demo(this->message);}
-    };
-
 void test(std::shared_ptr<Cecilion::I_Event_actor> actor, Cecilion::Event_message* message) {
     LOG_INFO("Pressed key!");
 }
@@ -22,27 +15,7 @@ void test2(std::shared_ptr<Cecilion::I_Event_actor> actor, Cecilion::Event_messa
     LOG_INFO("App pressed mouse key!");
 }
 
-class foo:public Cecilion::I_Event_actor {
-public:
 
-    void unsub() {
-        this->unsubscribe(Cecilion::SYSTEM_STARTUP_EVENT);
-    }
-
-    static void call(std::shared_ptr<Cecilion::I_Event_actor> actor, Cecilion::Event_message* mess) {
-        LOG_INFO(dynamic_cast<demo*>(mess)->message);
-    }
-
-    foo() : I_Event_actor("Foo") {
-        this->actor_inbox = std::make_shared<Cecilion::Async_inbox>(std::shared_ptr<I_Event_actor>(this));
-        this->subscribe_to(Cecilion::SYSTEM_STARTUP_EVENT, &call);
-    }
-
-    void post() {
-        std::shared_ptr<Cecilion::Event_message> pointer = std::make_shared<demo>("I have sent a message to myself. Weeeee");
-        Cecilion::Event_system::post(pointer);
-    }
-};
 
 struct Render_object {
     Cecilion::GL_shader* m_shader;
@@ -158,7 +131,7 @@ public:
     }
 
     ~Example_layer() override {
-
+        delete this->m_shader;
     }
 private:
     Cecilion::Filter<Render_object> filter;
@@ -171,13 +144,6 @@ private:
 class App : public Cecilion::Application {
 public :
     App() {
-        foo* f = new foo();
-        for (int i = 0; i < 20; i++) {
-            if (i == 10) {
-                f->unsub();
-            }
-            f->post();
-        }
 
         std::shared_ptr<Cecilion::Application_layer_st> layer = std::make_shared<Cecilion::Application_layer_st>();
         std::shared_ptr<Cecilion::Application_layer_st> layer2 = std::make_shared<Cecilion::Application_layer_st>();
@@ -187,8 +153,12 @@ public :
         this->push_layer(layer);
         this->push_overlay(layer2);
 //        layer2->subscribe_to(Cecilion::MOUSE_CURSOR_POS_EVENT, &test2);
-        layer->subscribe_to(Cecilion::MOUSE_BUTTON_EVENT, &test2);
-        layer2->subscribe_to(Cecilion::KEYBOARD_KEY_EVENT, &test);
+        layer->subscribe_to(typeid(Cecilion::Mouse_button_Event), [](Cecilion::Event_message* message){
+            LOG_INFO("App pressed mouse key!");
+        });
+        layer2->subscribe_to(typeid(Cecilion::Keyboard_key_Event), [](Cecilion::Event_message* message){
+            LOG_INFO("Pressed key!");
+        });
     }
 
     ~App() {

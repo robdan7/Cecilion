@@ -5,7 +5,7 @@
 #include "Core/Log.h"
 namespace Cecilion {
     Async_inbox::Async_inbox(std::shared_ptr<I_Event_actor> event_parent) : I_Event_inbox(event_parent){
-        this->p_message_stack = new std::list<Buffered_event>();
+//        this->p_message_stack = std::list<Buffered_event>();
         //this->p_event_parent = event_parent;
     }
 
@@ -14,14 +14,14 @@ namespace Cecilion {
         this->message_stack_m.lock();
         // Clearing the message stack will terminate the event thread if it is running.
 
-        this->p_message_stack->clear();
+        this->p_message_stack.clear();
         this->message_stack_m.unlock();
         if (this->p_event_thread->joinable()) {
             // Let the thread finish if it needs to run. It will quit immediately
             // because it's outside the loop and the message stack
             this->p_event_thread->join();
         }
-        delete this->p_message_stack;
+//        delete this->p_message_stack;
         delete this->p_event_thread;
     }
 /**
@@ -38,17 +38,17 @@ namespace Cecilion {
 
                 this->message_stack_m.lock();
 
-                if (this->p_message_stack->empty()) {
+                if (this->p_message_stack.empty()) {
                     this->message_stack_m.unlock();
                     condition = false;
                     continue;
                 }
 
                 // Get the event out of the stack.
-                Buffered_event event_copy = this->p_message_stack->front();
-                this->p_message_stack->pop_front();  // This will delete it from object memory.
+                Buffered_event event_copy = this->p_message_stack.front();
+                this->p_message_stack.pop_front();  // This will delete it from object memory.
                 this->message_stack_m.unlock();
-                event_copy.callback(this->p_event_parent, event_copy.event.get());
+                event_copy.callback(event_copy.event.get());
             }
             this->event_thread_m.unlock();
         });
@@ -67,14 +67,14 @@ namespace Cecilion {
     void Async_inbox::send_to_inbox(std::shared_ptr<Event_message> event, Event_callback callback) {
         Async_inbox::Buffered_event buffered_event = Buffered_event(std::move(event), callback);
         this->message_stack_m.lock();
-        if (this->p_message_stack->empty()) {
+        if (this->p_message_stack.empty()) {
 
             if (this->event_thread_m.try_lock()) {
                 this->StartThread();
                 this->event_thread_m.unlock();
             }
         }
-        this->p_message_stack->push_back(buffered_event);
+        this->p_message_stack.push_back(buffered_event);
         //this->condition.notify_one();
         this->message_stack_m.unlock();
     }
@@ -88,7 +88,7 @@ namespace Cecilion {
  * @param message_ID
  * @param callback
  */
-    void Async_inbox::subscribe_to(int message_ID, Async_inbox::Event_callback callback) {
+    void Async_inbox::subscribe_to(std::type_index message_ID, Async_inbox::Event_callback callback) {
         // TODO add check for double subscription.
         this->message_stack_m.lock();
         Event_system::subscribe(message_ID, std::shared_ptr<Async_inbox>(this), callback);
@@ -101,18 +101,18 @@ namespace Cecilion {
  * but no new events will be posted to this inbox.
  * @param message_ID
  */
-    void Async_inbox::unsubscribe(int message_ID) {
+    void Async_inbox::unsubscribe(std::type_index message_ID) {
         this->message_stack_m.lock();
         try {
             Event_system::unsubscribe(message_ID, this);
             this->subscribed_messages.remove(message_ID);
-            auto it = this->p_message_stack->begin();
+            auto it = this->p_message_stack.begin();
 
             /// Delete all messages that are no longer in the subscription list.
             int i = 0;
-            while(it != this->p_message_stack->end()) {
+            while(it != this->p_message_stack.end()) {
                 if ((*it).event->message_ID == message_ID) {
-                    it = this->p_message_stack->erase(it);
+                    it = this->p_message_stack.erase(it);
                     i++;
                 } else {
                     ++it;
@@ -120,7 +120,7 @@ namespace Cecilion {
             }
             if (i) CORE_LOG_WARN("There were "+ std::to_string(i) +" events in inbox buffer when actor unsubscribed.");
         } catch (int e) {
-            CORE_LOG_ERROR(" Event actor " + this->get_parent()->name() + "is not a subscriber to event ID " + std::to_string(message_ID));
+            CORE_LOG_ERROR(" Event actor " + this->get_parent()->name() + "is not a subscriber to event ID {0}", message_ID.name());
         }
         this->message_stack_m.unlock();
     }

@@ -12,19 +12,16 @@
 namespace Cecilion {
     Application* Application::s_instance = nullptr;
 
-    void Application::window_close_callback(std::shared_ptr<I_Event_actor> actor, Event_message* message) {
-        CORE_LOG_INFO("User closed the window. Shutting down Cecilion.");
-        dynamic_cast<Application*>(actor.get())->shutdown();
-    }
-
-
     Application::Application() : I_Event_actor("Cecilion_application") {
         CORE_ASSERT(!this->s_instance, "Application is a lready initialized");
         s_instance = this;
 
         this->actor_inbox = std::make_shared<Async_inbox>(std::shared_ptr<I_Event_actor>(this));
         this->m_window = Window::create_window();
-        this->subscribe_to(WINDOW_CLOSE_EVENT, &Cecilion::Application::window_close_callback);
+        this->subscribe_to(typeid(Cecilion::Window_close_event), [this](Event_message* message){
+            CORE_LOG_INFO("User closed the window. Shutting down Cecilion.");
+            this->shutdown();
+        });
         this->application_layers = new Layer_stack();
         this->m_imgui_layer = std::make_shared<ImGui_layer>();
         this->push_overlay(this->m_imgui_layer);

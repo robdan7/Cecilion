@@ -15,7 +15,6 @@ namespace Cecilion {
         Application();
         virtual ~Application() = 0;
         void run();
-        static void window_close_callback(std::shared_ptr<I_Event_actor> actor, Event_message* message);
         void shutdown();
         inline static Application& get() {return *s_instance;}
         inline Window& get_window() {return *this->m_window; }

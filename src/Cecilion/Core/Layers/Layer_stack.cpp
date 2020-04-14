@@ -17,48 +17,31 @@ namespace Cecilion {
         this->overlays = std::list<std::shared_ptr<Application_layer>>();
     }
 
-/**
- * This is the static function that will be called when any tye of event occurs.
- * @param actor
- * @param event
- */
-    void Layer_stack::event_inbox(std::shared_ptr<I_Event_actor> actor, Event_message *event) {
-
-        dynamic_cast<Layer_stack *>(actor.get())->dispatch_layer_event(std::shared_ptr<Event_message> (event));
-    }
-
-/**
- * Internal dispatch method. The topmost layer dispatch method will be called.
- * It is up to the layers to forward messaged until a layer catches it.
- * @param event
- */
-    void Layer_stack::dispatch_layer_event(const std::shared_ptr<Event_message>&  event) {
-        if (!this->overlays.empty()) {
-            //CORE_LOG_INFO("Dispatching event {0} to overlays", event->message_ID);
-            this->overlays.back().get()->dispatch(event);
-        } else if(!this->layers.empty()) {
-            //CORE_LOG_INFO("Dispatching event {0} to layers", event->message_ID);
-            this->layers.back().get()->dispatch(event);
-        }
-
-    }
-
-/**
- * This should be used by layers when they want to subscibe to an event.
- * The layer stack will call the top most layer for all events, and that layer will call the second one
- * and so on. If a layer has subscribed to and event, it will stop the recursive call pattern and
- * handle the event.
- * @param event_ID
- */
-    void Layer_stack::add_layer_subscription(unsigned int event_ID) {
-        std::list<unsigned int>::iterator it;
-        it = std::find(this->subscribed_events.begin(), this->subscribed_events.end(), event_ID);
+    /**
+    * This should be used by layers when they want to subscibe to an event.
+    * The layer stack will call the top most layer for all events, and that layer will call the second one
+    * and so on. If a layer has subscribed to and event, it will stop the recursive call pattern and
+    * handle the event.
+    * @param event_ID
+    */
+    void Layer_stack::add_layer_subscription(std::type_index event_ID) {
+        auto it = std::find(this->subscribed_events.begin(), this->subscribed_events.end(), event_ID);
         if (it == this->subscribed_events.end()) {
             /// only add a subscription if we haven't subscribed yet.
             this->subscribed_events.push_back(event_ID);
-            this->subscribe_to(event_ID, &Cecilion::Layer_stack::event_inbox);
+
+            /// Add subscription to the event system.
+            this->subscribe_to(event_ID, [this](Event_message *event){
+//                CORE_LOG_INFO("Dispatching event {0} to overlays", event->message_ID.name());
+                if (!this->overlays.empty()) {
+                    //CORE_LOG_INFO("Dispatching event {0} to overlays", event->message_ID);
+                    this->overlays.back().get()->dispatch(std::shared_ptr<Event_message>(event));
+                } else if(!this->layers.empty()) {
+                    //CORE_LOG_INFO("Dispatching event {0} to layers", event->message_ID);
+                    this->layers.back().get()->dispatch(std::shared_ptr<Event_message>(event));
+                }
+            });
         }
-        // TODO find what aint working.
     }
 
 /**

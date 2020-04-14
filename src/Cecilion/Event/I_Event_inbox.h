@@ -7,6 +7,8 @@
 #include "Event_message.h"
 #include <condition_variable>
 #include <utility>
+#include <functional>
+#include <typeindex>
 namespace Cecilion {
 
     class I_Event_actor;
@@ -21,12 +23,13 @@ namespace Cecilion {
         /**
          * This is the function that will be called when a message is posted.
          */
-        typedef void(*Event_callback)(std::shared_ptr<I_Event_actor> actor, Event_message* message);
+//        typedef void(*Event_callback)(std::shared_ptr<I_Event_actor> actor, Event_message* message);
+        typedef std::function<void(Event_message*)> Event_callback;
 
         explicit I_Event_inbox(std::shared_ptr<I_Event_actor>  event_parent);
         virtual void send_to_inbox(std::shared_ptr<Event_message> event, Event_callback callback) = 0;
-        virtual void subscribe_to(int message_ID, Event_callback callback) = 0;
-        virtual void unsubscribe(int message_ID) = 0;
+        virtual void subscribe_to(std::type_index message_ID, Event_callback callback) = 0;
+        virtual void unsubscribe(std::type_index message_ID) = 0;
 
         virtual std::shared_ptr<I_Event_actor> get_parent();
     protected:
@@ -42,9 +45,9 @@ namespace Cecilion {
         Inbox_entry(std::shared_ptr<I_Event_inbox>  inbox, I_Event_inbox::Event_callback callback);
         std::shared_ptr<I_Event_inbox> get_inbox_target();
         void invoke_inbox(std::shared_ptr<Event_message>  event);
-        bool operator ==(const Inbox_entry& entry) {
-            return this->p_inbox == entry.p_inbox && this->callback == entry.callback;
-        };
+//        bool operator ==(const Inbox_entry& entry) {
+//            return this->p_inbox == entry.p_inbox && this->callback == entry.callback;
+//        };
     private:
         const I_Event_inbox::Event_callback callback;
         std::shared_ptr<I_Event_inbox>  p_inbox;

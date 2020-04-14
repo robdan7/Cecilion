@@ -5,12 +5,14 @@
 #include <Core/Log.h>
 namespace Cecilion {
     void Cecilion::Application_layer_mt::dispatch(std::shared_ptr<Event_message> event) {
-        std::map<unsigned int, Inbox_entry*>::iterator it;
+
+//        std::unordered_map<std::type_index, Inbox_entry*>::iterator it;
         this->inbox_m.lock();
-        if ((it = this->inbox_entries.find(event->message_ID)) != this->inbox_entries.end()) {
+        if (this->inbox_entries.count(event->message_ID)) {
+//            CORE_LOG_INFO("Arrived at layer");
             this->inbox_m.unlock();
             //CORE_LOG_INFO("Invoking inbox");
-            it->second->invoke_inbox(event);
+            this->inbox_entries[event->message_ID]->invoke_inbox(event);
         } else if (this->previous != nullptr) {
             this->inbox_m.unlock();
             this->previous->dispatch(event);
@@ -22,7 +24,7 @@ namespace Cecilion {
     }
 
     void
-    Cecilion::Application_layer_mt::subscribe_to(unsigned int message_ID, Cecilion::I_Event_inbox::Event_callback callback) {
+    Cecilion::Application_layer_mt::subscribe_to(std::type_index message_ID, Cecilion::I_Event_inbox::Event_callback callback) {
         // TODO check for multiple subscriptions to the same event.
         this->inbox_m.lock();
         this->inbox_entries[message_ID] = new Inbox_entry(std::shared_ptr<I_Event_inbox>(this->actor_inbox), callback);
@@ -30,7 +32,7 @@ namespace Cecilion {
         this->p_parent->add_layer_subscription(message_ID);
     }
 
-    void Cecilion::Application_layer_mt::unsubscribe(unsigned int message_ID) {
+    void Cecilion::Application_layer_mt::unsubscribe(std::type_index message_ID) {
         // TODO implement
         I_Event_actor::unsubscribe(message_ID);
     }
