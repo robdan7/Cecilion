@@ -51,10 +51,6 @@ namespace Cecilion {
         */
         template<typename Event>
         static void dispatch_event(std::shared_ptr<Event> event) {
-            /// The following line is somewhat of a hack. The typeid of a shared pointer is not the same
-            /// as a the type of a normal object. We therefore need to reset the ID to the actual type of the event.
-            // TODO Do something so this line can be removed completely.
-            ((Event*)event.get())->message_ID = typeid(Event);
             actor_list_m.lock();
             if (actor_list.count(typeid(Event))) {
                 try {

@@ -35,8 +35,6 @@ namespace Cecilion {
         }
         actors->add_inbox_entry(inbox, callback);
         actor_list_m.unlock();
-        // TODO DELETE
-        std::cout <<  event_ID.name() << std::endl;
         //CORE_LOG_TRACE("Actor " + inbox->get_parent()->name() + " subscribed to message ID " + std::to_string(message_ID));
     }
 

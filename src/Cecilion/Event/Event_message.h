@@ -27,38 +27,38 @@ namespace Cecilion {
 
     struct Mouse_button_Event : public Event_message {
         const int button, action;
-        Mouse_button_Event(int button, int action) : Event_message(typeid(this)), button(button), action(action) {
+        Mouse_button_Event(int button, int action) : Event_message(typeid(Mouse_button_Event)), button(button), action(action) {
         }
     };
 
     struct Mouse_cursor_Event : public Event_message {
         const double xpos, ypos;
-        Mouse_cursor_Event(double xpos, double ypos) : Event_message(typeid(this)), xpos(xpos), ypos(ypos) {
+        Mouse_cursor_Event(double xpos, double ypos) : Event_message(typeid(Mouse_cursor_Event)), xpos(xpos), ypos(ypos) {
         }
     };
 
     struct Mouse_scroll_Event : public Event_message {
         const double x_offset, y_offset;
-        Mouse_scroll_Event(double x_offset, double y_offset) : Event_message(typeid(this)), x_offset(x_offset), y_offset(y_offset) {}
+        Mouse_scroll_Event(double x_offset, double y_offset) : Event_message(typeid(Mouse_scroll_Event)), x_offset(x_offset), y_offset(y_offset) {}
     };
 
     struct Keyboard_key_Event : public Event_message {
         const int keycode, action;
-        Keyboard_key_Event(int keycode, int action) : Event_message(typeid(this)), keycode(keycode), action(action) {}
+        Keyboard_key_Event(int keycode, int action) : Event_message(typeid(Keyboard_key_Event)), keycode(keycode), action(action) {}
     };
 
     struct Keyboard_char_event : public Event_message {
         unsigned int unicode;
-        Keyboard_char_event(unsigned int unicode) : Event_message(typeid(this)), unicode(unicode){}
+        Keyboard_char_event(unsigned int unicode) : Event_message(typeid(Keyboard_char_event)), unicode(unicode){}
     };
 
     struct Window_resize_event : public Event_message {
         int width, height;
-        Window_resize_event(int width, int height) : Event_message(typeid(this)), width(width), height(height){}
+        Window_resize_event(int width, int height) : Event_message(typeid(Window_resize_event)), width(width), height(height){}
     };
 
     struct Window_close_event : public Event_message {
-        Window_close_event() : Event_message(typeid(this)) {}
+        Window_close_event() : Event_message(typeid(Window_close_event)) {}
     };
 }
 
