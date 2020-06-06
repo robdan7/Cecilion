@@ -19,16 +19,22 @@ target_include_directories(Cecilion_input PRIVATE ${CECILION_HEADER})
 
 # --- Add core library ---
 add_library(Cecilion_Core STATIC "")
+#target_sources(Cecilion_Core
+#        PUBLIC
+#        Application.cpp
+#        Window.cpp
+#        Layers/Layer_stack.cpp
+#        Layers/Application_layer_st.cpp
+#        Layers/Application_layer_mt.cpp
+#        )
 target_sources(Cecilion_Core
         PUBLIC
         Application.cpp
         Window.cpp
-        Layers/Layer_stack.cpp
-        Layers/Application_layer_st.cpp
-        Layers/Application_layer_mt.cpp
         )
 target_include_directories(Cecilion_Core PRIVATE ${CECILION_HEADER})
 target_link_libraries(Cecilion_Core PRIVATE Cecilion_Log Platform  Cecilion_renderer Cecilion_input OpenGL_renderer)
 
 # Only precompile PUBLIC headers if they are used outside of Cecilion_Core.
-target_precompile_headers(Cecilion_Core PUBLIC Window.h Application.h Layers/Layer_stack.h Layers/Application_layer_st.h)
+#target_precompile_headers(Cecilion_Core PUBLIC Window.h Application.h Layers/Layer_stack.h Layers/Application_layer_st.h)
+target_precompile_headers(Cecilion_Core PUBLIC Window.h Application.h)

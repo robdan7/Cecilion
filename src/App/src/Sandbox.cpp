@@ -5,24 +5,15 @@
 #include <vector>
 #include <typeinfo>
 #include <Utils/Sparse_set.h>
-
-
-void test(std::shared_ptr<Cecilion::I_Event_actor> actor, Cecilion::Event_message* message) {
-    LOG_INFO("Pressed key!");
-}
-
-void test2(std::shared_ptr<Cecilion::I_Event_actor> actor, Cecilion::Event_message* message) {
-    LOG_INFO("App pressed mouse key!");
-}
-
-
+#include <functional>
 
 struct Render_object {
     Cecilion::GL_shader* m_shader;
     std::shared_ptr<Cecilion::Vertex_array> m_vertex_array;
 };
 
-class Example_layer : public Cecilion::Application_layer_st {
+template<typename... Event>
+class Example_layer : public Cecilion::Layer<Event...> {
 public:
     Example_layer(): filter(Cecilion::ECS::get_filter<Render_object>()){
         uint32_t vert = Cecilion::GL_shader::create_shader(OPENGL_VERTEX_SHADER, R"(
@@ -114,25 +105,20 @@ public:
 
     }
     void on_update() override {
-        Application_layer_st::on_update();
+        Cecilion::Layer<Event...>::on_update();
+
         Cecilion::Render_command::set_clear_color({0.2f,0.2f,0.2f,1.0f});
         Cecilion::Render_command::clear();
 
         Cecilion::Renderer::begin_scene();
         this->filter.for_each_compact([](Render_object& arg){
             arg.m_shader->bind();
-
-
             Cecilion::Renderer::submit(arg.m_vertex_array);
             arg.m_shader->unbind();
         });
         Cecilion::Renderer::end_scene();
-
     }
 
-    ~Example_layer() override {
-        delete this->m_shader;
-    }
 private:
     Cecilion::Filter<Render_object> filter;
     Cecilion::GL_shader* m_shader;
@@ -144,42 +130,19 @@ private:
 class App : public Cecilion::Application {
 public :
     App() {
-
-        std::shared_ptr<Cecilion::Application_layer_st> layer = std::make_shared<Cecilion::Application_layer_st>();
-        std::shared_ptr<Cecilion::Application_layer_st> layer2 = std::make_shared<Cecilion::Application_layer_st>();
-        std::shared_ptr<Example_layer> example = std::make_shared<Example_layer>();
-
-        this->push_layer(example);
-        this->push_layer(layer);
-        this->push_overlay(layer2);
-//        layer2->subscribe_to(Cecilion::MOUSE_CURSOR_POS_EVENT, &test2);
-        layer->subscribe_to(typeid(Cecilion::Mouse_button_Event), [](Cecilion::Event_message* message){
-            LOG_INFO("App pressed mouse key!");
-        });
-        layer2->subscribe_to(typeid(Cecilion::Keyboard_key_Event), [](Cecilion::Event_message* message){
-            LOG_INFO("Pressed key!");
-        });
+        Cecilion::Layer<>* imgui = new Cecilion::ImGui_layer();
+        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(imgui)));
+        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(new Example_layer<>())));
     }
 
     ~App() {
 
     }
+
 };
 
 
 Cecilion::Application* Cecilion::CreateApplication() {
-
-    /// How to iterate through components:
-    /**
-     * Components are stored in pages. Each page can either exist or not exist.
-     *
-     * 0: get an iterator for the SMALLEST set of pages.
-     *
-     * 1: Check if all component containers has the given page. Otherwise continue.
-     *
-     * 2: For each index of all the arrays, check if it exists in ALL of them (do a conjunction on has_ID)
-     * 3: If it does, call the function with the element at iterator index
-     */
     LOG_INFO("Sandbox says hello!");
     return new App();
 }

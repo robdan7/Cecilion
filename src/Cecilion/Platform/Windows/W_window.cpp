@@ -65,22 +65,18 @@ namespace Cecilion {
             this_window->m_data->height = height;
             this_window->m_data->width = width;
             this_window->activate_resize();
-            Event_system::post<Cecilion::Window_resize_event>(width, height);
+//            Event_system::post<Cecilion::Window_resize_event>(width, height);
             //CORE_LOG_INFO("Window was resized to ({0}, {1})", width, height);
         });
 
 
         /// These events should be handled by the app layers.
         glfwSetMouseButtonCallback(this->m_window, [](GLFWwindow* window, int button, int action, int mods){
-            //W_window* this_window = get_GLFW_window(window);
             Event_system::post<Cecilion::Mouse_button_Event>(button, action);
-//            Input::notify_mouse_button(button, action);
         });
 
         glfwSetKeyCallback(this->m_window, [](GLFWwindow* window, int key, int scancode, int action, int mods){
-            //CORE_LOG_INFO("Key {0} set action {1}", key, action);
             Event_system::post<Cecilion::Keyboard_key_Event>(key, action);
-//            Input::notify_key_status(key, action);
         });
 
         glfwSetCharCallback(this->m_window, [](GLFWwindow* window, unsigned int unicode) {

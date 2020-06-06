@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core/Window.h"
-#include "Event/I_Event_actor.h"
-#include "Event/Event_message.h"
+//#include "Event/I_Event_actor.h"
+//#include "Event/Event_message.h"
 //#include "Window.h"
 #include <Platform/OpenGL/OpenGL.h>
 #include <Renderer/GLFW_context.h>

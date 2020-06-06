@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iostream>
-#include "Event/Event_system.h"
+//#include "Event/Event_system.h"
 
 /**
  * Pure entry point for the engine. Nothing fancy going on here.

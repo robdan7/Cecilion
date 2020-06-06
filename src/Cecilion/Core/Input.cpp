@@ -39,6 +39,7 @@ namespace Cecilion {
  * @param button
  */
     void Input::notify_mouse_button(int button, int action) {
+            std::cout <<"DDDD" << std::endl;
             Event_system::post<Cecilion::Mouse_button_Event>(button, action);
     }
 

@@ -1,27 +1,104 @@
 #pragma once
-
-#include <Event/I_Event_actor.h>
+#include "Layer_group.h"
+#include "Layer.h"
+#include <Event/Event_system.h>
 #include <vector>
-#include "Application_layer.h"
-
 namespace Cecilion {
-    class Application_layer_st;
-    class Layer_stack : public I_Event_actor {
+    class Layer_stack {
+        using ID = int;
     public:
-        Layer_stack();
-//        static void event_inbox(std::shared_ptr<I_Event_actor> actor, Event_message* event);
-//        void dispatch_layer_event(const std::shared_ptr<Event_message>&  event);
-        void add_layer_subscription(std::type_index event_ID);
-        void push_layer(const std::shared_ptr<Application_layer>& layer, bool overlay);
-        void pop_layer(const std::shared_ptr<Application_layer>& layer, bool overlay);
-        void on_update();
-        void on_imgui_render();
+        Layer_stack() {
+//            (Event_system::subscribe_to<Events>([this](auto ID){
+//                auto iterator = this->m_groups.rbegin();
+//                while(iterator != this->m_groups.rend()) {
+//                    if ((*iterator)->template try_forward<Events>(ID)) {
+//                        break;
+//                    }
+//                    iterator ++;
+//                }
+//                // TODO loop through all groups until the event is handled.
+////                this->m_group_mappings[this->active_layer]->template try_forward<Events>(ID);
+//            }),...);
+        }
+
+        ID append_group() {
+            this->m_groups.push_back(std::make_shared<Layer_group>());
+            this->m_group_mappings[this->id_counter] = this->m_groups.back();
+            this->active_layer = id_counter;
+            return id_counter++;
+        }
+
+        void on_update() {
+            for (auto i = this->m_groups.rbegin();i != this->m_groups.rend();++i) {
+                (*i)->on_update();
+            }
+        }
+
+        /**
+         * Append a new layer to the current active layer group.
+         * @param layer
+         */
+        template<typename... Events>
+        void append_layer(std::unique_ptr<Layer<Events...>> layer) {
+            this->m_group_mappings[this->active_layer]->append_layer(std::move(layer));
+            (this->add_subscription<Events>(),...);
+        }
+
+        void set_active_group(ID group_ID) {
+            this->active_layer = group_ID;
+        }
+
+        void hide_group(ID group_ID) {
+            this->m_group_mappings[group_ID]->hide();
+        }
+
+        void show_group(ID group_ID) {
+            this->m_group_mappings[group_ID]->show();
+        }
+
+        /**
+         * Force a group to be set on top of all other groups.
+         * @param group_ID
+         */
+        void move_on_top(ID group_ID) {
+            auto iterator = std::find(this->m_groups.begin(), this->m_groups.end(), this->m_group_mappings[group_ID]);
+            if (iterator != this->m_groups.end()) {
+                this->m_groups.push_back(*iterator);
+                this->m_groups.erase(iterator);
+            }
+        }
+
+        /**
+         * Not tested, but it should work. Lemme know if it doesn't :)
+         * @param group_ID
+         */
+        void delete_group(ID group_ID) {
+            auto iterator = std::find(this->m_groups.begin(), this->m_groups.end(), this->m_group_mappings[group_ID]);
+            if (iterator != this->m_groups.end()) {
+                this->m_groups.erase(iterator);
+            }
+        }
     private:
-        void remap_inbox_entries(Application_layer* layer);
-        std::map<unsigned int, Inbox_entry*> inbox_entries;
-        std::list<std::shared_ptr<Application_layer>> layers;
-        std::list<std::shared_ptr<Application_layer>> overlays;
-        std::list<std::type_index> subscribed_events;
+
+        template<typename Event>
+        void add_subscription() {
+            if (std::find(this->subscriptions.begin(), this->subscriptions.end(), typeid(Event)) == this->subscriptions.end()) {
+                Event_system::subscribe_to<Event>([this](auto ID){
+                    auto iterator = this->m_groups.rbegin();
+                    while(iterator != this->m_groups.rend()) {
+                        if ((*iterator)->template try_forward<Event>(ID)) {
+                            break;
+                        }
+                        iterator ++;
+                    }
+                });
+            }
+        }
+
+        std::vector<std::shared_ptr<Layer_group>> m_groups;
+        std::unordered_map<ID, std::shared_ptr<Layer_group>> m_group_mappings;
+        std::vector<std::type_index> subscriptions;
+        ID id_counter = 0;
+        ID active_layer = 0;
     };
 }
-
