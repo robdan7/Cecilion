@@ -30,7 +30,6 @@ namespace Cecilion {
         }
         void hide() {this->visible = false;}
         void show() {this->visible = true;}
-//    private:
         template<typename Event>
         bool try_forward(unsigned int event_ID) {
             if (!this->visible) {return false;}
@@ -43,11 +42,9 @@ namespace Cecilion {
 
         void on_update() {
             if (!this->visible) {return;}
-            /** Reverse iterator */
-            for (auto i = this->m_layers.rbegin();i != this->m_layers.rend();++i) {
-                (*i)->on_update();
+            for (auto& layer: this->m_layers) {
+                layer->on_update();
             }
-
         }
 
     private:
@@ -61,10 +58,7 @@ namespace Cecilion {
          */
         template<typename Event, typename... Events>
         void set_callback(std::shared_ptr<Layer<Events...>> layer) {
-//            this->m_callback_mappings[typeid(Event)] = [layer](auto event_ID){layer->template notify_me<Event>(event_ID);};
-            if (layer->template has_subscription<Event>()) {
                 this->m_callback_mappings[typeid(Event)] = layer;
-            }
         }
     private:
         std::vector<std::shared_ptr<I_Layer>> m_layers;

@@ -63,7 +63,6 @@ namespace Cecilion {
             template<typename Function>
             void set_callback(Function function) {
                 this->callback = function;
-                this->has_callback = true;
             }
 
             void lock_mutex() {
@@ -79,7 +78,6 @@ namespace Cecilion {
             My_callback callback = [](Event i) {};
             std::vector<uint16_t> incoming_events;
             std::mutex event_m;
-            bool has_callback = false;
         };
 
     public:
@@ -130,11 +128,6 @@ namespace Cecilion {
             std::get<test_event_container<Event>*>(my_tuple)->set_callback(function);
         }
 
-        template<typename Event>
-        bool has_subscription() {
-            return std::get<test_event_container<Event>*>(this->my_tuple)->has_callback;
-        }
-
     private:
         /**
          * This locks a container in the inbox and checks its events.
@@ -175,11 +168,6 @@ namespace Cecilion {
 
         ~Event_actor() {
             delete this->inbox;
-        }
-
-        template<typename Event>
-        bool has_subscription() {
-            return this->inbox->template has_subscription<Event>();
         }
 
         /**

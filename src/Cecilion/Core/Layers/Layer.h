@@ -12,8 +12,6 @@ namespace Cecilion {
     template<typename... Events>
     class Layer : public I_Layer, public Event_actor<Events...>{
     public:
-//        void on_update() override;
-
         Layer();
         template<typename Event>
         void notify_me(unsigned int event_ID);

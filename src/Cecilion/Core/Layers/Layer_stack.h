@@ -7,19 +7,7 @@ namespace Cecilion {
     class Layer_stack {
         using ID = int;
     public:
-        Layer_stack() {
-//            (Event_system::subscribe_to<Events>([this](auto ID){
-//                auto iterator = this->m_groups.rbegin();
-//                while(iterator != this->m_groups.rend()) {
-//                    if ((*iterator)->template try_forward<Events>(ID)) {
-//                        break;
-//                    }
-//                    iterator ++;
-//                }
-//                // TODO loop through all groups until the event is handled.
-////                this->m_group_mappings[this->active_layer]->template try_forward<Events>(ID);
-//            }),...);
-        }
+        Layer_stack() {}
 
         ID append_group() {
             this->m_groups.push_back(std::make_shared<Layer_group>());
@@ -29,8 +17,8 @@ namespace Cecilion {
         }
 
         void on_update() {
-            for (auto i = this->m_groups.rbegin();i != this->m_groups.rend();++i) {
-                (*i)->on_update();
+            for (auto& group : this->m_groups) {
+                group->on_update();
             }
         }
 

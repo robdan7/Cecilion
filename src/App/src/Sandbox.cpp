@@ -130,9 +130,9 @@ private:
 class App : public Cecilion::Application {
 public :
     App() {
+        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(new Example_layer<>())));
         Cecilion::Layer<>* imgui = new Cecilion::ImGui_layer();
         this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(imgui)));
-        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(new Example_layer<>())));
     }
 
     ~App() {
