@@ -3,7 +3,7 @@
 #include <functional>
 #include <atomic>
 #include <mutex>
-#include <bitset>
+//#include <bitset>
 #include "Event_system.h"
 #include <iostream>
 
@@ -82,9 +82,7 @@ namespace Cecilion {
 
     public:
         Inbox() {
-            int i = 0;
             ((std::get<test_event_container<Events>*>(this->my_tuple) = new test_event_container<Events>()),...);
-//            (std::get<test_event_container<Events>>(this->my_tuple)->Init(i++), ...);
         }
         /**
     * In the multi threaded version:
@@ -109,10 +107,9 @@ namespace Cecilion {
         template<typename Event>
         void notify(unsigned int event_ID) {
             auto container = std::get<test_event_container<Event>*>(this->my_tuple);
-            this->has_events_m.lock();
-            this->has_events.set(container->index);
+//            this->has_events_m.lock();
             container->lock_mutex();
-            this->has_events_m.unlock();
+//            this->has_events_m.unlock();
             container->notify(event_ID);
             container->unlock_mutex();
         }
@@ -136,17 +133,15 @@ namespace Cecilion {
         template<typename Event>
         void check_container() {
             auto container = std::get<test_event_container<Event>*>(this->my_tuple);
-            this->has_events_m.lock();
-            this->has_events.set(container->index, 0);
+//            this->has_events_m.lock();
             container->lock_mutex();
-            this->has_events_m.unlock();
+//            this->has_events_m.unlock();
             container->check_inbox_container();
             container->unlock_mutex();
         }
     private:
         std::tuple<test_event_container<Events>*...> my_tuple;
-        std::mutex has_events_m;
-        std::bitset<sizeof...(Events)> has_events;
+//        std::mutex has_events_m;
     };
 
 
