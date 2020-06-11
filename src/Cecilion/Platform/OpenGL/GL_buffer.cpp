@@ -28,6 +28,14 @@ namespace Cecilion {
         glDeleteBuffers(1, &this->m_buffer_ID);
     }
 
+    int GL_vertex_buffer::get_instance_divisor() {
+        return this->m_divisor;
+    }
+
+    void GL_vertex_buffer::set_instance_divisor(int divisor) {
+        this->m_divisor = divisor;
+    }
+
     /// -------------- Index buffer --------------
 
     GL_index_buffer::GL_index_buffer(uint32_t *indices, uint32_t count) : m_count(count) {

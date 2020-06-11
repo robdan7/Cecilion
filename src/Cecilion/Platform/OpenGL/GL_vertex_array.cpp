@@ -12,22 +12,47 @@ namespace Cecilion {
         glBindVertexArray(0);
     }
 
+    /**
+     * Append a vertex buffer to this vertex array.
+     * @param vertex_buffer
+     */
     void GL_vertex_array::add_vertex_buffer(const std::shared_ptr<Vertex_buffer>& vertex_buffer) {
 
         CORE_ASSERT(vertex_buffer->get_layout().get_elements().size(), "Vertex buffer layout is undefined!");
         glBindVertexArray(this->m_render_ID);
         vertex_buffer->bind();
-        uint32_t index = 0;
         for(const auto& element: vertex_buffer->get_layout()) {
-            glEnableVertexAttribArray(index);
-            glVertexAttribPointer(index,element.get_component_count(),GL_FLOAT,element.normalized?GL_TRUE:GL_FALSE, vertex_buffer->get_layout().get_stride(), (const void*)element.offset);
-            index++;
-            // TODO add automatic support for GL_FLOAT etc.
+            /**
+             * Since matrices take up four attribute locations, we need to set
+             * one attrib pointer per column of the matrix. This means a 4x4 matrix will
+             * take up 4 attribute locations.
+             */
+            int x = std::max((int)element.get_component_count(), 1) - 1;
+            auto locations = (x-x%4)/4+1;
+
+            /// Iterate through all the locations we need to create.
+            for (int i = 0; i < locations; i++) {
+                glEnableVertexAttribArray(m_current_index+i);
+                glVertexAttribPointer(m_current_index+i,
+                        element.get_base_component_count(),
+                        GL_FLOAT,
+                        element.normalized ? GL_TRUE : GL_FALSE,
+                        vertex_buffer->get_layout().get_stride(),
+                        (const void*)(element.offset+element.base_component_size*i)
+                        );
+                glVertexAttribDivisor(m_current_index+i, vertex_buffer->get_instance_divisor());
+            }
+            m_current_index += locations;
         }
         glBindVertexArray(0);
         m_vertex_buffers.push_back(vertex_buffer);
     }
 
+    /**
+     * Set the index buffer that points to vertex indexes. There can only be one of these in a vertex
+     * array.
+     * @param index_buffer
+     */
     void GL_vertex_array::set_index_buffer(const std::shared_ptr<Index_buffer>& index_buffer) {
         glBindVertexArray(this->m_render_ID);
         index_buffer->bind();

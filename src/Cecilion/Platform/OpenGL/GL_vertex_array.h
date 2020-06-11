@@ -22,6 +22,7 @@ namespace Cecilion {
         uint32_t m_render_ID;
         std::vector<std::shared_ptr<Vertex_buffer>> m_vertex_buffers;
         std::shared_ptr<Index_buffer> m_index_buffer;
+        int m_current_index = 0;
     };
 }
 

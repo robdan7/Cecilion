@@ -3,6 +3,7 @@
 #include <Core/Log.h>
 #include <Platform/OpenGL/GL_buffer.h>
 namespace Cecilion {
+
     Vertex_buffer *Cecilion::Vertex_buffer::Create(float *vertices, uint32_t size) {
         switch (Renderer::get_API()) {
             case Renderer_API::API::None :

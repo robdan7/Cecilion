@@ -15,4 +15,10 @@ namespace Cecilion {
         glDrawElements(GL_TRIANGLES, vertex_array->get_index_buffer()->get_count(), GL_UNSIGNED_INT, nullptr);
     }
 
+    void GL_renderer_API::draw_instanced(const std::shared_ptr<Vertex_array> &vertex_array, int instances) {
+//        glDrawArraysInstanced(GL_TRIANGLES, 0,vertex_array->get_index_buffer()->get_count(), 1);
+        glDrawElementsInstanced(GL_TRIANGLES, vertex_array->get_index_buffer()->get_count(), GL_UNSIGNED_INT, nullptr, instances);
+//        glDrawElements(GL_TRIANGLES, vertex_array->get_index_buffer()->get_count(), GL_UNSIGNED_INT, nullptr);
+    }
+
 }
