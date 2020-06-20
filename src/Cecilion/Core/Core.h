@@ -1,13 +1,29 @@
 #pragma once
 #define CECILION_ENABLE_ASSERTS
-//#include "Window.h"
-#include "Application.h"
-#include "Log.h"
-//#include "Core/Layers/Application_layer_st.h"
-#include "Layers/Layer.h"
-#include "Layers/Layer_stack.h"
-#include "Layers/Layer_group.h"
-#include "Entry_point.h"
+
+/// define what platform we're compiling to.
+#ifdef _WIN32
+#ifdef _WIN64
+#define CECILION_PLATFORM_WINDOWS_X64
+#else
+#define CECILION_PLATFORM_WINDOWS_X84
+#endif
+#else
+#error "Your platform is not supported!"
+#endif
+
+/**
+ * These functions declarations are used to configure
+ * a proper rendering API. The definition can be found in Platform.h
+ */
+#include <Renderer/GLFW_context.h>
+#include "Renderer/Renderer_API.h"
+namespace Cecilion {
+    GLFW_context* create_engine_context();
+    Cecilion::Renderer_API::API get_API();
+}
+
+
 
 
 

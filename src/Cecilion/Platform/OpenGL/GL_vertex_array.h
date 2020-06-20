@@ -10,7 +10,7 @@ namespace Cecilion {
 
         void unbind() const override;
 
-        void add_vertex_buffer(const std::shared_ptr<Vertex_buffer>& vertex_buffer) override;
+        void add_vertex_buffer(const std::shared_ptr<Vertex_buffer>& vertex_buffer, uint32_t instance_divisor) override;
 
         void set_index_buffer(const std::shared_ptr<Index_buffer>& index_buffer) override;
 

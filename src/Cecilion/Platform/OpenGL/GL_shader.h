@@ -3,56 +3,57 @@
 #include <string>
 #include <vector>
 #include <Core/Log.h>
+#include <iostream>
+#include <Renderer/Shader.h>
+#include <initializer_list>
 
+/// TODO These defines should not be here.
 #define OPENGL_VERTEX_SHADER (35633)
 #define OPENGL_FRAGMENT_SHADER (35632)
-// TODO these defines wont be needed if shaders are compiled from assets.
+#define OPENGL_GEOMETRY_SHADER (0x8DD9)
+
 namespace Cecilion {
-
-
-
-    class GL_shader {
+    class GL_shader;
+    class GL_shader_stage : public Cecilion::Shader_stage {
+        friend class GL_shader;
     public:
-        struct Shader_program {
-            friend GL_shader;
-        private:
-            unsigned int program;
-            Shader_program(unsigned int program) : program(program){}
-        public:
-            void bind();
-            void unbind();
-        };
+        GL_shader_stage(const uint32_t shader_type, const std::string&& shader_source);
+
+
+        ~GL_shader_stage() override;
+    private:
+        void delete_shader(const uint32_t& shader);
+        uint32_t shader;
+    };
+    class GL_shader : public Cecilion::Shader {
+    public:
+        GL_shader(std::initializer_list<std::shared_ptr<Shader_stage>> shaderstages);
 
         /**
-         * Link one or more shaders into a shader program.
-         * @tparam Args
-         * @param shaders - This must be valid shaders of the type GLuint, or unsigned int.
-         * @return
+         * Load a precompiled shader. WARNING: The binary format is vendor specific, which means
+         * one binary shader won't load on a different gpu. the specific binary format can be
+         * retrieved with glGetProgramBinary. The specific format for my gpu is 36385.
+         * @param binary_format
+         * @param binary
+         * @param size
          */
-        template<typename... Args>
-        static Shader_program create_shader_program(Args... shaders) {
-            auto program = initialize_shader_program();
-            (attach_shader(program, shaders),...);
-            auto result = link_shader_program(program);
-            (detach_shader(program, shaders),...);
-            return result;
+        GL_shader(uint32_t binary_format, const char *binary, uint32_t size);
+        ~GL_shader() override;
+        void bind() override;
+        void unbind() override;
+
+        void compile() override;
+
+        void attach_shader_stage(std::shared_ptr<Shader_stage> shader_stage) override;
+
+        uint32_t get_ID() override {
+            return this->m_program;
         }
 
-        static uint32_t create_shader(const uint32_t shader_type, const std::string& shader_source);
-        /**
-         * This effectively deletes the shader from memory. It can no longer be bound to programs.
-         * @param shader
-         */
-        static void delete_shader(const uint32_t& shader);
-
     private:
+        uint32_t m_program;
+        int m_linked;
 
-        static unsigned int initialize_shader_program();
-        static Shader_program link_shader_program(unsigned int program);
-
-        static void attach_shader(unsigned int program, unsigned int shader);
-        static void detach_shader(unsigned int program, unsigned int shader);
-    public:
 
     };
 

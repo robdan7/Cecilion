@@ -1,8 +1,26 @@
 #pragma once
 
-// TODO Dynamically evaluate what platform we're on.
-// Included by Window.h. Maybe not the most optimal way of doing it.
-// The user should be able to define default platform and render context and
-// be able to switch out the context if they want
-#define CECILION_PLATFORM_WINDOWS
-#define RENDER_CONTEXT_GL
+#include <Core/Log.h>
+#include <Platform/OpenGL/GL_context.h>
+#include "Renderer/Renderer_API.h"
+
+/// The following function created the graphics API
+namespace Cecilion {
+    GLFW_context* create_engine_context() {
+        #ifdef API_OPENGL   // Must be defined by the user.
+            return new Cecilion::GL_context();
+            #else
+                CORE_ASSERT(false, "Could not find a valid API context!")
+                return nullptr;
+        #endif
+    }
+
+    Renderer_API::API get_API(){
+        #ifdef API_OPENGL   // Must be defined by the user.
+            return Cecilion::Renderer_API::API::OpenGL;
+        #else
+            CORE_ASSERT(false, "Could not find a valid API context!")
+            return Cecilion::Renderer_API::API::None;
+        #endif
+    }
+}

@@ -1,8 +1,10 @@
 #pragma  once
 
 #include <glm/glm.hpp>
-#include "Vertex_array.h"
+#include <memory>
+//#include "Vertex_array.h"
 namespace Cecilion {
+    class Vertex_array;
     class Renderer_API {
     public:
         enum class API {
@@ -17,6 +19,7 @@ namespace Cecilion {
     private:
         static API s_API;
     };
+
 }
 
 

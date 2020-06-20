@@ -13,6 +13,7 @@ namespace Cecilion {
     class Layer : public I_Layer, public Event_actor<Events...>{
     public:
         Layer();
+        virtual ~Layer() {}
         template<typename Event>
         void notify_me(unsigned int event_ID);
         void on_update() override;

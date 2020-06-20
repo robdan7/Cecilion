@@ -2,10 +2,48 @@
 
 #include <Renderer/Buffer.h>
 namespace Cecilion {
+
+//    class GL_raw_buffer : public Raw_buffer {
+//    public:
+////        ~GL_raw_buffer();
+////        void bind() override;
+////        void unbind() override;
+//
+////        void reset_buffer(float *vertices, uint32_t size) override;
+////        void set_sub_data(float *vertices, uint32_t offset, uint32_t size) override;
+////        void resize_buffer(uint32_t size) override;
+//    protected:
+//        GL_raw_buffer(float* vertices, uint32_t size, Access_frequency frequency, Access_type type, uint32_t gl_type);
+//        GL_raw_buffer(float* vertices, uint32_t size, uint32_t access_type, uint32_t gl_type);
+//
+//    public:
+//        virtual ~GL_raw_buffer();
+//
+//        void bind() override;
+//
+//        void unbind() override;
+//
+//        void reset_buffer(float *vertices, uint32_t size) override;
+//
+//        void set_sub_data(float *vertices, uint32_t offset, uint32_t size) override;
+//
+//        void resize_buffer(uint32_t size) override;
+//
+//    protected:
+////        uint32_t m_buffer_ID;
+//        int m_divisor = 0;
+//        uint32_t m_GL_draw_type;
+//        uint32_t m_buffer_ID;
+//    private:
+//        uint32_t m_gl_type;
+//    };
+
     class GL_vertex_buffer : public Vertex_buffer {
     public:
-        GL_vertex_buffer(float* vertices, uint32_t size);
+        GL_vertex_buffer(void* vertices, uint32_t size, Access_frequency frequency, Access_type type);
+        GL_vertex_buffer(uint32_t size, Access_frequency frequency, Access_type type);
         ~GL_vertex_buffer() override;
+
         void bind() override;
         void unbind() override;
 
@@ -25,10 +63,41 @@ namespace Cecilion {
          */
         void set_instance_divisor(int divisor) override;
 
+        void reset_buffer(float *vertices, uint32_t size) override;
+
+        void resize_buffer(uint32_t size) override;
+
+        void set_sub_data(float *vertices,uint32_t offset, uint32_t size) override;
+        uint32_t get_ID() {return this->m_buffer_ID;}
+
     private:
         Buffer_layout m_layout;
-        uint32_t m_buffer_ID;
         int m_divisor = 0;
+        uint32_t m_GL_draw_type;
+        uint32_t m_buffer_ID;
+//        int m_divisor = 0;
+//        uint32_t m_GL_draw_type;
+    };
+
+    /**
+     * Also known as uniform buffers.
+     */
+    class GL_shader_param_buffer : public Shader_param_buffer {
+    public:
+        GL_shader_param_buffer(void* vertices, uint32_t size, Access_frequency frequency, Access_type type);
+        GL_shader_param_buffer(uint32_t size, Access_frequency frequency, Access_type type);
+        void bind() override;
+
+        void unbind() override;
+
+        void reset_buffer(float *vertices, uint32_t size) override;
+
+        void set_sub_data(float *vertices, uint32_t offset, uint32_t size) override;
+
+        void resize_buffer(uint32_t size) override;
+    private:
+        uint32_t m_GL_draw_type;
+        uint32_t m_buffer_ID;
     };
 
     class GL_index_buffer : public Index_buffer {

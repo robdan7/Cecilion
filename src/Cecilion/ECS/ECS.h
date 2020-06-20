@@ -65,6 +65,11 @@ namespace Cecilion {
         }
 
 
+        template<typename Component>
+        static Component& get_component(Entity entity) {
+            return (static_cast<Component_storage<Entity, Component>*>(&(*containers.at(container_mappings[typeid(Component)]))))->get(entity);
+        }
+
     private:
         static std::unordered_map<std::type_index, int> container_mappings;
         static std::vector<std::shared_ptr<Sparse_set<Entity>>> containers;

@@ -3,6 +3,7 @@
 #include "Layer.h"
 #include <Event/Event_system.h>
 #include <vector>
+#include <Core/Log.h>
 namespace Cecilion {
     class Layer_stack {
         using ID = int;
@@ -17,9 +18,12 @@ namespace Cecilion {
         }
 
         void on_update() {
+//            CORE_LOG_INFO("Updating layers...");
             for (auto& group : this->m_groups) {
+//                CORE_LOG_INFO("Updating layer");
                 group->on_update();
             }
+//            CORE_LOG_INFO("Done with the updates");
         }
 
         /**

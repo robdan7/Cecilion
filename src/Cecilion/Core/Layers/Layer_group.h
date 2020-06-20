@@ -5,6 +5,7 @@
 #include <typeindex>
 #include <functional>
 #include "Layer.h"
+#include <Core/Log.h>
 namespace Cecilion {
     class Layer_stack;
 

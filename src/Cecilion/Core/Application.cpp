@@ -9,6 +9,7 @@
 //#include <Renderer/Buffer.h>
 #include <Event/Event_system.h>
 #include "Input.h"
+#include <Debug/Instrumentor.h>
 
 namespace Cecilion {
     Application* Application::s_instance = nullptr;
@@ -25,6 +26,7 @@ namespace Cecilion {
 
 
         this->m_window = Window::create_window();
+        CORE_LOG_INFO("Application created!");
     }
 
     Application::~Application() {
@@ -33,8 +35,15 @@ namespace Cecilion {
     void Application::run() {
 
         while (this->m_running) {
-            Event_actor_st<Window_close_event>::on_update();
-            Layer_stack::on_update();
+            CECILION_PROFILE_SCOPE("New frame");
+            {
+
+
+                Event_actor_st<Window_close_event>::on_update();
+                {
+                    CECILION_PROFILE_SCOPE("Layer updates");
+                    Layer_stack::on_update();
+                }
 //            for (int i = 0; i < 100; i ++) {
 //                Event_system::post<Cecilion::Mouse_button_Event>(0,0);
 //            }
@@ -43,7 +52,8 @@ namespace Cecilion {
 ////            this->m_imgui_layer->begin();
 //            this->application_layers->on_imgui_render();
 ////            this->m_imgui_layer->end();
-            this->m_window->on_update();
+                this->m_window->on_update();
+            }
         }
     }
 

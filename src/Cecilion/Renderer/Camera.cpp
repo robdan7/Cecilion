@@ -8,7 +8,7 @@ namespace Cecilion {
         this->m_up_vector = {0,1,0};
         this->m_position = {0,0,0};
         this->m_rotation = {this->m_up_vector.x,this->m_up_vector.y,this->m_up_vector.z,0};
-        this->m_viewpoint = {0,0,1};
+        this->m_viewpoint = {0,0,-1};
         this->m_projection_matrix = glm::perspective(fov,aspect_ratio,znear,zfar);
         this->m_view_projection_matrix = this->m_projection_matrix * this->m_view_matrix;
     }

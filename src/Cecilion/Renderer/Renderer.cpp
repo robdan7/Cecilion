@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "Render_command.h"
 #include <Platform/OpenGL/GL_renderer_API.h>
+#include "Vertex_array.h"
 
 namespace Cecilion {
     Renderer_API* Render_command::s_render_API = new GL_renderer_API();

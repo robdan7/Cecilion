@@ -1,10 +1,9 @@
 include(Cecilion_HEADERS.cmake)
 
-add_subdirectory(Platform)
 add_subdirectory(Core)
-#add_subdirectory(Event)
-add_subdirectory(ImGui)
+add_subdirectory(Platform)
 add_subdirectory(Renderer)
+add_subdirectory(ImGui)
 add_subdirectory(ECS)
 add_subdirectory(Utils)
 add_subdirectory(Event)

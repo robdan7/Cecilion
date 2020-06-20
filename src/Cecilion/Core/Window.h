@@ -1,6 +1,5 @@
 #pragma once
-
-#include <Platform/Platform.h>
+//#include <Platform/Platform.h>
 #include <string>
 #include <Renderer/GLFW_context.h>
 

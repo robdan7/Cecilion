@@ -1,12 +1,17 @@
 #pragma once
 
+#include <initializer_list>
 #include <cstdint>
 #include <Core/Log.h>
+#include <Renderer/Renderer_API.h>
 
 namespace Cecilion {
     enum class Shader_data {
         None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool
     };
+
+
+    // TODO Move stuff to cpp files. I know the header files are pre compiled, but it's better that way.
 
     /**
      * This returns the complete size of a data type in floats.
@@ -55,31 +60,61 @@ namespace Cecilion {
         return 0;
     }
 
+    static char* get_shader_data_string(const Shader_data &type) {
+        switch(Renderer_API::get_API()) {
+            case Renderer_API::API::OpenGL:
+                switch (type) {
+                    case Shader_data::Float:    return "float";
+                    case Shader_data::Float2:   return "vec2";
+                    case Shader_data::Float3:   return "vec3";
+                    case Shader_data::Float4:   return "vec4";
+                    case Shader_data::Mat3:     return "mat3";
+                    case Shader_data::Mat4:     return "mat4";
+                    case Shader_data::Int:      return "int";
+                    case Shader_data::Int2:     return "ivec2";
+                    case Shader_data::Int3:     return "ivec3";
+                    case Shader_data::Int4:     return "ivec4";
+                    case Shader_data::Bool:     return "bool";
+                }
+                break;
+            case Renderer_API::API::None:
+                CORE_ASSERT(false, "Renderer::Buffer:: Could not find a render API!");
+                break;
+        }
+        return "";
+    }
+
     /**
      * Buffer elements are an abstract way of organising buffer layouts. One element
      * contains the data that defines the size, type and offset of one vertex attribute.
      */
     struct Buffer_element {
-        std::string name;
-        Shader_data type;
+        std::string m_name;
+        Shader_data m_type;
+        char* m_string_representation;
         /** Total size in bytes. A component with multiple vectors will have a combined size.*/
-        uint32_t size;
+        uint32_t m_size;
         /** Size per component part in bytes. A matrix component will have the byte size of one row/column. */
-        uint32_t base_component_size;
-        size_t offset;  /// Byte offset within one vertex.
-        bool normalized;
+        uint32_t m_base_component_size;
+        size_t m_offset;  /// Byte offset within one vertex.
+        bool m_normalized;
         Buffer_element(Shader_data type, const std::string& name, bool normalized = false)
-            : name(name) , type(type), size(shader_data_count(type)<<2), base_component_size(base_shader_data_count(type)<<2), offset(0), normalized(normalized) {
+                : m_name(name) ,
+                  m_type(type),
+                  m_size(shader_data_count(type) << 2),
+                  m_base_component_size(base_shader_data_count(type) << 2),
+                  m_offset(0),
+                  m_normalized(normalized),
+                  m_string_representation(get_shader_data_string(type)) {
 
         }
-        Buffer_element() {}
 
         /**
          *
          * @return The total number of float-sized numbers in this component.
          */
         uint32_t get_component_count() const {
-            return this->size>>2;
+            return this->m_size >> 2;
         }
 
         /**
@@ -87,7 +122,7 @@ namespace Cecilion {
          * @return
          */
         uint32_t get_base_component_count() const {
-            return this->base_component_size>>2;
+            return this->m_base_component_size >> 2;
         }
     };
 
@@ -115,9 +150,9 @@ namespace Cecilion {
             size_t offset = 0;
             this->m_stride = 0;
             for (auto& element: this->m_elements) {
-                element.offset = offset;
-                offset += element.size;
-                this->m_stride += element.size;
+                element.m_offset = offset;
+                offset += element.m_size;
+                this->m_stride += element.m_size;
             }
         }
     private:
@@ -125,7 +160,38 @@ namespace Cecilion {
         std::vector<Buffer_element> m_elements;
     };
 
-    class Vertex_buffer {
+
+    class Raw_buffer {
+    public:
+        enum class Access_frequency {
+            STATIC,STREAM,DYNAMIC
+        };
+        enum class Access_type {
+            DRAW, READ, COPY
+        };
+
+        /**
+         * Binds this buffer. This function is directly taken from the OpenGL way of doing things.
+         */
+        virtual void bind() = 0;
+        /**
+         * Unbind this buffer. The opposite of binding.
+         */
+        virtual void unbind() = 0;
+
+        virtual void reset_buffer(float* vertices,uint32_t size) = 0;
+        virtual void set_sub_data(float* vertices,uint32_t offset, uint32_t size) = 0;
+        virtual void resize_buffer(uint32_t size) = 0;
+
+        uint32_t get_size() {return this->m_size;}
+    protected:
+        Raw_buffer(uint32_t size) : m_size(size){}
+        void set_size(uint32_t size) {this->m_size = size;}
+    private:
+        uint32_t m_size;
+    };
+
+    class Vertex_buffer : public Raw_buffer {
     public:
 
         /**
@@ -137,16 +203,9 @@ namespace Cecilion {
          * @param size - The size of all vertices in bytes.
          * @return - A raw pointer to the newly created vertex buffer.
          */
-        static Vertex_buffer* Create(float* vertices, uint32_t size);
+        static Vertex_buffer* Create(void* vertices, uint32_t size, Raw_buffer::Access_frequency frequency, Raw_buffer::Access_type type);
         virtual ~Vertex_buffer() {}
-        /**
-         * Binds this buffer. This function is directly taken from the OpenGL way of doing things.
-         */
-        virtual void bind() = 0;
-        /**
-         * Unbind this buffer. The opposite of binding.
-         */
-        virtual void unbind() = 0;
+
         /**
          * Set the buffer layout, simple as that.
          * @param layout
@@ -155,7 +214,24 @@ namespace Cecilion {
         virtual Buffer_layout& get_layout() = 0;
         virtual int get_instance_divisor() = 0;
         virtual void set_instance_divisor(int divisor) = 0;
+
+        virtual uint32_t get_ID() = 0;
+
+    protected:
+        Vertex_buffer(uint32_t size) : Raw_buffer(size) {}
+
     };
+
+    /**
+     * Class for storing global shader parameters that are not shader or
+     * model specific. The OpenGL equivalent to this would be global uniforms.
+     */
+    class Shader_param_buffer : public Raw_buffer {
+    protected:
+        Shader_param_buffer(uint32_t size) : Raw_buffer(size) {}
+    };
+
+
 
     class Index_buffer {
     public:

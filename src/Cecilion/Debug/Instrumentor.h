@@ -123,9 +123,19 @@ namespace Cecilion {
         bool m_Stopped;
     };
 }
+//#define CECILION_USE_DEBUG
+#ifdef CECILION_USE_DEBUG
 #define CECILION_PROFILE_BEGIN_SESSION(name, filepath) Cecilion::Instrumentor::Get().BeginSession(name, filepath)
-#define CECILION_PROFILE_END_SESSION Cecilion::Instrumentor::Get().EndSession
+#define CECILION_PROFILE_END_SESSION Cecilion::Instrumentor::Get().EndSession()
 #define CECILION_PROFILE_SCOPE(name) Cecilion::InstrumentationTimer time##__LINE__(name)
 #define CECILION_PROFILE_FUNCTION() CECILION_PROFILE_SCOPE(__FUNCTION__)
+#else
+#define CECILION_PROFILE_BEGIN_SESSION(name, filepath)
+#define CECILION_PROFILE_END_SESSION
+#define CECILION_PROFILE_SCOPE(name)
+#define CECILION_PROFILE_FUNCTION()
+#endif
+
+
 
 

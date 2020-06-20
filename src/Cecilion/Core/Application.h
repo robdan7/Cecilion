@@ -21,16 +21,10 @@ namespace Cecilion {
         inline static Application& get() {return *s_instance;}
         inline Window& get_window() {return *this->m_window; }
 
-
-    protected:
-        inline void set_usercode(std::function<void()> function) { this->m_user_code = function;}
     private:
         Window* m_window;
         bool m_running = true;
         static Application* s_instance;
-
-        // TODO This should be replaced in the future with some kind of scheduling system for adding code during run-time
-        std::function<void()> m_user_code = [](){};
 
     };
 

@@ -28,7 +28,6 @@ namespace Cecilion {
         this->m_data->width = properties.width;
         this->m_data->vsync = true;
 
-        CORE_LOG_INFO("Creating window {0} ({1}, {2})", properties.title, properties.width, properties.height);
 
         if (!s_GLFW_initialized) {
             int glfw_success = glfwInit();
@@ -36,17 +35,19 @@ namespace Cecilion {
             s_GLFW_initialized = true;
         }
 
+
         this->m_window = glfwCreateWindow(
                 (int)this->m_data->width,
                 (int)this->m_data->height,
                 this->m_data->title.c_str(),
                 NULL, NULL);
+        CORE_LOG_INFO("Created window {0} ({1}, {2})", properties.title, properties.width, properties.height);
 
         this->m_graphics_context->init(this->m_window);
-//        glfwMakeContextCurrent(this->m_window);
 
-//        GLenum glew_success = glewInit();
-//        CORE_ASSERT(glew_success, "GLEW Error: No GLFW context found!");
+        const GLubyte* vendor = glGetString(GL_VENDOR); // Returns the vendor
+        const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
+        CORE_LOG_INFO("Created graphics context.\n    Vendor: {0}\n    Model: {1}", (char*)vendor,(char*)renderer);
 
         glfwSetWindowUserPointer(this->m_window, this);
         this->set_Vsync(this->m_data->vsync);
@@ -65,8 +66,7 @@ namespace Cecilion {
             this_window->m_data->height = height;
             this_window->m_data->width = width;
             this_window->activate_resize();
-//            Event_system::post<Cecilion::Window_resize_event>(width, height);
-            //CORE_LOG_INFO("Window was resized to ({0}, {1})", width, height);
+            Event_system::post<Cecilion::Window_resize_event>(width, height);
         });
 
 

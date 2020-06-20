@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <Debug/Instrumentor.h>
 //#include "Event/Event_system.h"
 
 /**
@@ -16,7 +17,8 @@ int main(int argc, char **argv) {
     CORE_LOG_INFO("Entry point says hello!");
 
     auto app = Cecilion::CreateApplication();
+//    CECILION_PROFILE_BEGIN_SESSION("Running", "Renderer.json");
     app->run();
-
+//    CECILION_PROFILE_END_SESSION();
     delete app;
 }

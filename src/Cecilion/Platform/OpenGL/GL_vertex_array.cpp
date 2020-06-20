@@ -1,10 +1,12 @@
 #include "GL_vertex_array.h"
 #include <Platform/OpenGL/OpenGL.h>
+#include <Debug/Instrumentor.h>
 namespace Cecilion {
     GL_vertex_array::GL_vertex_array() {
         glCreateVertexArrays(1, &this->m_render_ID);
     }
     void GL_vertex_array::bind() const {
+        CECILION_PROFILE_FUNCTION();
         glBindVertexArray(this->m_render_ID);
     }
 
@@ -16,7 +18,7 @@ namespace Cecilion {
      * Append a vertex buffer to this vertex array.
      * @param vertex_buffer
      */
-    void GL_vertex_array::add_vertex_buffer(const std::shared_ptr<Vertex_buffer>& vertex_buffer) {
+    void GL_vertex_array::add_vertex_buffer(const std::shared_ptr<Vertex_buffer>& vertex_buffer, uint32_t instance_divisor) {
 
         CORE_ASSERT(vertex_buffer->get_layout().get_elements().size(), "Vertex buffer layout is undefined!");
         glBindVertexArray(this->m_render_ID);
@@ -36,11 +38,11 @@ namespace Cecilion {
                 glVertexAttribPointer(m_current_index+i,
                         element.get_base_component_count(),
                         GL_FLOAT,
-                        element.normalized ? GL_TRUE : GL_FALSE,
+                                      element.m_normalized ? GL_TRUE : GL_FALSE,
                         vertex_buffer->get_layout().get_stride(),
-                        (const void*)(element.offset+element.base_component_size*i)
+                        (const void*)(element.m_offset + element.m_base_component_size * i)
                         );
-                glVertexAttribDivisor(m_current_index+i, vertex_buffer->get_instance_divisor());
+                glVertexAttribDivisor(m_current_index+i, instance_divisor);
             }
             m_current_index += locations;
         }
