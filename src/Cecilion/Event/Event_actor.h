@@ -3,35 +3,31 @@
 #include <functional>
 #include <atomic>
 #include <mutex>
-//#include <bitset>
 #include "Event_system.h"
 #include <iostream>
 
 namespace Cecilion {
 
-
+    /**
+     * Each event actor has its own inbox that takes care of sorting events and
+     * eventually executing them.
+     * @tparam Events
+     */
     template<typename... Events>
     class Inbox {
     private:
         /**
-        * Container for one type of events in an inbox. It will repeatedly call the lambda function
-        * for all events that are currently in the inbox list.
+        * Container for one type of events in an inbox.
         * @tparam E
         */
         template<typename Event>
-        class test_event_container {
+        class Event_container {
         public:
 
             /** Typedef for the callback type **/
             typedef std::function<void(Event event)> My_callback;
 
-            test_event_container() {
-
-            }
-
-            void Init(int index) {
-                this->index = index;
-            }
+            Event_container() {}
 
             /**
              * This is the method that actually calls the callback given by an
@@ -74,7 +70,6 @@ namespace Cecilion {
             }
 
         public:
-            int index;
             My_callback callback = [](Event i) {};
             std::vector<uint16_t> incoming_events;
             std::mutex event_m;
@@ -82,7 +77,7 @@ namespace Cecilion {
 
     public:
         Inbox() {
-            ((std::get<test_event_container<Events>*>(this->my_tuple) = new test_event_container<Events>()),...);
+            ((std::get<Event_container<Events>*>(this->m_event_containers) = new Event_container<Events>()),...);
         }
         /**
     * In the multi threaded version:
@@ -106,10 +101,8 @@ namespace Cecilion {
          */
         template<typename Event>
         void notify(unsigned int event_ID) {
-            auto container = std::get<test_event_container<Event>*>(this->my_tuple);
-//            this->has_events_m.lock();
+            auto container = std::get<Event_container<Event>*>(this->m_event_containers);
             container->lock_mutex();
-//            this->has_events_m.unlock();
             container->notify(event_ID);
             container->unlock_mutex();
         }
@@ -122,7 +115,7 @@ namespace Cecilion {
          */
         template<typename Event, typename Function>
         void set_callback(Function function) {
-            std::get<test_event_container<Event>*>(my_tuple)->set_callback(function);
+            std::get<Event_container<Event>*>(m_event_containers)->set_callback(function);
         }
 
     private:
@@ -132,16 +125,13 @@ namespace Cecilion {
          */
         template<typename Event>
         void check_container() {
-            auto container = std::get<test_event_container<Event>*>(this->my_tuple);
-//            this->has_events_m.lock();
+            auto container = std::get<Event_container<Event>*>(this->m_event_containers);
             container->lock_mutex();
-//            this->has_events_m.unlock();
             container->check_inbox_container();
             container->unlock_mutex();
         }
     private:
-        std::tuple<test_event_container<Events>*...> my_tuple;
-//        std::mutex has_events_m;
+        std::tuple<Event_container<Events>*...> m_event_containers;
     };
 
 
@@ -189,6 +179,9 @@ namespace Cecilion {
         /**
          * Subscriptions are not added when the actor is created. Instead,
          * the user must decide if and when to initialize all subscriptions.
+         *
+         * This is useful for multi threaded event actors. It allows the actor to start a thread
+         * before subscribing to any events.
          */
         void init_subscriptions() {
             (Event_system::subscribe_to<Events>([this](auto ID){

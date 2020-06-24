@@ -12,6 +12,10 @@
 #include "Config.h"
 namespace Cecilion {
 
+    /**
+     * This is the global entity component system. A lot of inspiration has been taken from
+     * ENTT on GitHub and other various sources on the web. It actually works though.
+     */
     class ECS {
     public:
         static const Entity MAX_VALUE = std::numeric_limits<Entity>::max()-1;
@@ -32,6 +36,13 @@ namespace Cecilion {
         static void delete_entity(Entity entity);
 
 
+        /**
+         * Assign a component to an entity.
+         * @tparam Component
+         * @tparam Args
+         * @param entity
+         * @param args - The arguments required to create the in-place or as a copy.
+         */
         template<typename Component, typename... Args>
         static void add_component(Entity entity, Args&&... args) {
             if (!container_mappings.count(typeid(Component))) {

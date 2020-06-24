@@ -2,6 +2,9 @@
 
 #include "Buffer.h"
 namespace Cecilion {
+    /**
+     * Just a generic vertex array class.
+     */
     class Vertex_array {
     public:
         virtual ~Vertex_array();

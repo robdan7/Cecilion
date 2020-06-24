@@ -52,7 +52,7 @@ namespace Cecilion {
 
     private:
         uint32_t m_program;
-        int m_linked;
+        int m_linked = 0;
 
 
     };

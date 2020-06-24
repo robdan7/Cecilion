@@ -3,6 +3,8 @@
 #include <Platform/OpenGL/GL_vertex_array.h>
 #include <Platform/OpenGL/OpenGL.h>
 #include <Debug/Instrumentor.h>
+#include <iostream>
+#include <fstream>
 
 namespace Cecilion {
 
@@ -14,16 +16,20 @@ namespace Cecilion {
         Frustum_compute_query::execute();
         this->shader_program->bind();
         this->m_vao->bind();
+        glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, this->m_TFO);
 
-        glGenQueries(1,&m_last_frustum_query);
         glEnable(GL_RASTERIZER_DISCARD);
         glBeginTransformFeedback(GL_POINTS);
-        glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, m_last_frustum_query);
+//        glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, m_last_frustum_query);
+        glBeginQueryIndexed(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN,1, m_last_frustum_query);
         glDrawArrays(GL_POINTS, 0, this->m_vertices->get_size() / this->m_vertices->get_layout().get_stride());
-        glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+//        glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+        glEndQueryIndexed(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN,1);
         glEndTransformFeedback();
         glDisable(GL_RASTERIZER_DISCARD);
-//            glFlush();  // Make sure all commands are transported into the pipeline.
+
+        glFlush();  // Make sure all commands are transported into the pipeline.
+        glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
         this->m_vao->unbind();
         this->shader_program->unbind();
@@ -33,11 +39,8 @@ namespace Cecilion {
     GL_Frustum_compute_query::GL_Frustum_compute_query(std::shared_ptr<Vertex_buffer> data_buffer, std::shared_ptr<Vertex_buffer> instance_data)
             : Frustum_compute_query(data_buffer, instance_data) {
 
-        /*
-         * TODO The shaders are not actually calculating whether the vertex is inside the screen,
-         * it just checks whether the position is inside (1,1). There are also no view matrices transform
-         * the position into screen space.
-         */
+        // TODO do some actual frustum culling.
+        // TODO Code cleanup. String concatenation results in unnecessary temporary strings.
 
         std::string vertex_shader = R"(
             #version 440 core
@@ -78,19 +81,21 @@ namespace Cecilion {
             iterator ++;
         }
         vertex_shader += "}";
-//        CORE_LOG_INFO(vertex_shader);
+
         auto vertex_stage = std::make_shared<GL_shader_stage>(OPENGL_VERTEX_SHADER, std::move(vertex_shader));
 
         /// -------- Geometry shader ---------
         std::string geometry = R"(
             #version 440 core
-            layout (points) in;
-            layout (points, max_vertices = 1) out;
+            layout (invocations = 2, points) in;
+            layout (points, max_vertices = 10) out;
 
             in Vertex_data {
                 vec4 position;
 //                float radius;
             } vertex_data[];
+
+//            layout(stream = 1) out vec4 stream_position;
 
         )";
 
@@ -100,34 +105,42 @@ namespace Cecilion {
         }
         geometry += "} instance_output[];\n";
 
-        geometry += "layout(xfb_offset = 0) out Geometry_data {\n";
-        for (int x = 0; x < i; x++) {
-            geometry += data[x] + ";\n";
+        /// Create one output buffer for each stream/LOD.
+        for(int buffers = 0; buffers < 4; buffers++) {
+            std::string stream = std::to_string(buffers);
+            geometry += "layout(stream = "+stream+", xfb_buffer = "+stream+", xfb_offset=0) out Geometry_data_stream_"+stream+" {\n";
+            for (int x = 0; x < i; x++) {
+                geometry += data[x] + ";\n";
+            }
+            geometry += "} geometry_data_stream_"+std::to_string(buffers)+";\n";
         }
-        geometry += "} geometry_data;\n";
 
         geometry += R"(
             void main() {
-                for (int i = 0; i < gl_in.length(); i++) {
-                    vec3 abs_position = abs(vertex_data[i].position.xyz);
-                    if (abs_position.x < 1 && abs_position.y < 1) {
+//                for (int i = 0; i < gl_in.length(); i++) {
+//                    vec3 abs_position = abs(vertex_data[i].position.xyz);
+//                    if (vertex_data[i].position.x < 0.5f) {
             )";
 
+        std::string stream = std::to_string(1);
         iterator = this->m_result_buffer->get_layout().begin();
         while (iterator != this->m_result_buffer->get_layout().end()) {
-            geometry += "geometry_data.instance_" + iterator->m_name + " = instance_output[i].instance_"+iterator->m_name + ";\n";
-//            geometry += "geometry_data.instance_" + iterator->m_name + " = vec4(1,1,1,1);\n";
+            geometry += "geometry_data_stream_"+stream+".instance_" + iterator->m_name + " = instance_output[0].instance_"+iterator->m_name + ";\n";
+            geometry += "geometry_data_stream_1.instance_" + iterator->m_name + " = instance_output[0].instance_"+iterator->m_name + ";\n";
             iterator ++;
         }
 
         geometry += R"(
-                EmitVertex();
-                }
-            }
-            EndPrimitive();
+                EmitStreamVertex(gl_InvocationID);
+                EndStreamPrimitive(gl_InvocationID);
             }
             )";
-//        CORE_LOG_INFO(geometry);
+
+        std::ofstream myfile;
+        myfile.open("geometry_shader.txt");
+        myfile << geometry;
+        myfile.close();
+
         auto geometry_stage = std::make_shared<GL_shader_stage>(OPENGL_GEOMETRY_SHADER, std::move(geometry));
 
         this->shader_program = std::unique_ptr<GL_shader>(new GL_shader({vertex_stage, geometry_stage}));
@@ -138,17 +151,18 @@ namespace Cecilion {
         this->m_vao->add_vertex_buffer(this->m_vertices, 0);
         this->m_vao->add_vertex_buffer(this->m_vertex_data, 0);
 
+        glGenTransformFeedbacks(1, &this->m_TFO);
+        glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, this->m_TFO);
+        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER,1,this->m_result_buffer->get_ID());
+        glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
-
-        this->m_vao->bind();
-        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER,0,this->m_result_buffer->get_ID());
-        this->m_vao->unbind();
+        glGenQueries(1,&m_last_frustum_query);
     }
 
     uint32_t &GL_Frustum_compute_query::fetch_result() {
         if (this->m_has_updated) {
             GLuint result;
-                glGetQueryObjectuiv(m_last_frustum_query, GL_QUERY_RESULT,&result);
+            glGetQueryObjectuiv(m_last_frustum_query, GL_QUERY_RESULT,&result);
             this->set_result(result);
             this->m_has_updated = false;
         }

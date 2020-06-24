@@ -1,6 +1,4 @@
-
 #include <Platform/OpenGL/GL_shader.h>
-#include "Shader.h"
 #include "Renderer.h"
 
 namespace Cecilion {

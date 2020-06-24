@@ -1,5 +1,4 @@
 #pragma once
-
 #include <Renderer/GLFW_context.h>
 namespace Cecilion {
     class GL_context : public GLFW_context{

@@ -1,5 +1,4 @@
 #pragma once
-//#include <Platform/Platform.h>
 #include <string>
 #include <Renderer/GLFW_context.h>
 
@@ -8,7 +7,7 @@ namespace Cecilion {
      * Abstract window class for Cecilion. The engine doesn't care what kind of window we're using.
      * It could be on Windows, Linux or Mac, Cecilion doesn't care.
      *
-     * TODO Implement support for multiple windows.
+     * TODO Implement support for multiple windows. Very low priority.
      */
     struct Window_properties {
         std::string title;

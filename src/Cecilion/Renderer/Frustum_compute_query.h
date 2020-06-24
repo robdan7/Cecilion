@@ -3,7 +3,10 @@
 #include <cstdint>
 #include <Renderer/Buffer.h>
 namespace Cecilion {
-    // TODO Add support for points, circles and bounding boxes.
+    /**
+     * This is exactly what is sounds like.
+     */
+    // TODO Add support for points, circles, bounding boxes etc.
     class Frustum_compute_query : public Compute_query<uint32_t, std::shared_ptr<Vertex_buffer>>{
     public:
         virtual inline ~Frustum_compute_query() {}

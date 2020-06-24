@@ -4,6 +4,9 @@
 #include <string>
 #include "Buffer.h"
 namespace Cecilion {
+    /**
+     * Generic shader class.
+     */
     class Shader_stage {
     public:
         virtual ~Shader_stage() {};

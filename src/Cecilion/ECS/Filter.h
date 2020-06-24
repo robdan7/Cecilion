@@ -4,6 +4,11 @@
 #include <Core/Log.h>
 #include "Config.h"
 namespace Cecilion {
+
+    /**
+     * Filter class for iterating over certain components and their entities.
+     * @tparam Component
+     */
     template<typename... Component>
     class Filter {
     public:

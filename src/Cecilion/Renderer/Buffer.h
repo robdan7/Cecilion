@@ -108,6 +108,14 @@ namespace Cecilion {
                   m_string_representation(get_shader_data_string(type)) {
 
         }
+//        Buffer_element(Buffer_element&& other):
+//        m_name(other.m_name),
+//        m_type(other.m_type),
+//        m_string_representation(other.m_string_representation),
+//        m_size(other.m_size),
+//        m_base_component_size(other.m_base_component_size),
+//        m_offset(other.m_base_component_size),
+//        m_normalized(other.m_normalized){}
 
         /**
          *
@@ -160,7 +168,9 @@ namespace Cecilion {
         std::vector<Buffer_element> m_elements;
     };
 
-
+    /**
+     * Base class for any buffer type.
+     */
     class Raw_buffer {
     public:
         enum class Access_frequency {
@@ -203,7 +213,7 @@ namespace Cecilion {
          * @param size - The size of all vertices in bytes.
          * @return - A raw pointer to the newly created vertex buffer.
          */
-        static Vertex_buffer* Create(void* vertices, uint32_t size, Raw_buffer::Access_frequency frequency, Raw_buffer::Access_type type);
+        static std::shared_ptr<Vertex_buffer> Create(void* vertices, uint32_t size, Raw_buffer::Access_frequency frequency, Raw_buffer::Access_type type);
         virtual ~Vertex_buffer() {}
 
         /**
@@ -227,22 +237,25 @@ namespace Cecilion {
      * model specific. The OpenGL equivalent to this would be global uniforms.
      */
     class Shader_param_buffer : public Raw_buffer {
+    public:
+        static std::shared_ptr<Shader_param_buffer> Create(void* vertices, uint32_t size, Raw_buffer::Access_frequency frequency, Raw_buffer::Access_type type);
+        virtual uint32_t get_ID() = 0;
     protected:
         Shader_param_buffer(uint32_t size) : Raw_buffer(size) {}
     };
 
 
 
+    /**
+     * An index buffer is the buffer that contains the order in which vertices
+     * will be drawn. This saves storage space if many vertices in the vertex
+     * buffer are connected/ the same.
+     */
     class Index_buffer {
     public:
         /**
          * Create a generic index buffer. This function will automatically
          * switch to the chosen renderer API when the program is compiled.
-         *
-         * An index buffer is the buffer that contains the order in which vertices
-         * will be drawn. This saves storage space if many vertices in the vertex
-         * buffer are connected. It is highly recommended to use an index buffer
-         * for meshes with more than one triangle.
          * @param indices - A pointer to an array of indices.
          * @param count - The size of all indices in bytes.
          * @return - A raw pointer to the newly created vertex buffer.

@@ -1,7 +1,3 @@
-//
-// Created by Robin on 2020-03-31.
-//
-
 #include "GL_context.h"
 #include "OpenGL.h"
 #include <Core/Log.h>

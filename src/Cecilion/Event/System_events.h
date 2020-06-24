@@ -2,6 +2,7 @@
 
 #include <typeindex>
 namespace Cecilion {
+    /// There are some basic event types supported by the engine.
 
     struct Mouse_button_Event {
         int button, action;

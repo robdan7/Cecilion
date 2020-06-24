@@ -1,17 +1,12 @@
 #pragma once
-#include <memory>
-
 #include "Window.h"
+#include <Event/System_events.h>
 #include "Layers/Layer_stack.h"
-#include <functional>
 #include <Event/Event_actor_st.h>
 
-//#include <ImGui/ImGui_layer.h>
-#include <Platform/OpenGL/GL_shader.h>
-#include <Platform/OpenGL/GL_buffer.h>
-#include <Renderer/Buffer.h>
-#include <Renderer/Vertex_array.h>
 namespace Cecilion {
+    class Layer_stack;
+
     class Application : public Event_actor_st<Window_close_event>, public Layer_stack {
     public:
         Application();

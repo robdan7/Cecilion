@@ -6,13 +6,14 @@
 #include "OpenGL.h"
 #include <Core/Log.h>
 namespace Cecilion {
+    uint32_t GL_shader_param_buffer::bindings = 0;
 
     class GL_Raw_buffer {
     public:
 
         static uint32_t calc_draw_type(Raw_buffer::Access_frequency frequency, Raw_buffer::Access_type type) {
             uint32_t draw_type = 0;
-            // TODO there must be a better way of doing this and still make it dynamic and fit other APIs.
+            // TODO there must be a better way of doing this and still make it dynamic and generic.
             switch(frequency) {
                 case Raw_buffer::Access_frequency::STATIC:
                     switch (type) {
@@ -194,6 +195,8 @@ namespace Cecilion {
                                                    Raw_buffer::Access_type type) : Shader_param_buffer(size){
         this->m_GL_draw_type = GL_Raw_buffer::calc_draw_type(frequency, type);
         this->m_buffer_ID = GL_Raw_buffer::init(vertices, size, this->m_GL_draw_type, GL_UNIFORM_BUFFER);
+        this->m_binding_point = bindings++;
+        glBindBufferBase(GL_UNIFORM_BUFFER, this->m_binding_point, this->m_buffer_ID);
     }
 
     GL_shader_param_buffer::GL_shader_param_buffer(uint32_t size,
@@ -201,6 +204,8 @@ namespace Cecilion {
             Raw_buffer::Access_type type) :
             GL_shader_param_buffer(nullptr, size, frequency, type) {
     }
+
+
 
 }
 

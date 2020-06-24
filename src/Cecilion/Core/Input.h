@@ -17,7 +17,7 @@ namespace Cecilion {
     public:
         inline static bool is_key_pressed(int keycode) {return s_instance->get_key_press_status(keycode);}
         inline static bool is_mouse_button_pressed(int button) {return s_instance->get_mouse_button_status(button);}
-        inline static std::pair<float, float> get_mouse_position() {return s_instance->get_mouse_pos_position();}
+        inline static std::pair<float, float> get_mouse_position() {return s_instance->get_mouse_pos();}
         static void notify_key_status(int keycode, int action);
         static void notify_char_status(int keycode);
         static void notify_mouse_pos(double x, double y);
@@ -26,7 +26,7 @@ namespace Cecilion {
     protected:
         virtual bool get_key_press_status(int keycode) = 0;
         virtual bool get_mouse_button_status(int button) = 0;
-        virtual std::pair<float, float> get_mouse_pos_position() = 0;
+        virtual std::pair<float, float> get_mouse_pos() = 0;
     private:
         // TODO Implement keycodes.
         static Input* s_instance;

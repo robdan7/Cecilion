@@ -6,7 +6,8 @@
 #include <fstream>
 #include <iterator>
 #include <bits/stdc++.h>
-
+#include <iostream>
+#include <sstream>
 namespace Cecilion {
     GL_shader::GL_shader(std::initializer_list<std::shared_ptr<Shader_stage>> shaderstages) {
         this->m_program = glCreateProgram();
@@ -35,7 +36,7 @@ namespace Cecilion {
             CORE_LOG_ERROR("GL_shader:: Tried to link program ID {0} twice", this->m_program);
             return;
         }
-        glProgramParameteri(this->m_program,GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE); // TODO remove
+//        glProgramParameteri(this->m_program,GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE); // TODO remove
         glLinkProgram(m_program);
 
         /// Check if the linking worked.
@@ -52,7 +53,13 @@ namespace Cecilion {
             glDeleteProgram(m_program);
 
             // TODO Fix proper error callback. The previous version didn't work.
-            CORE_LOG_ERROR("Shader program {0} compilation failed! \n", m_program);
+//            CORE_LOG_ERROR("Shader program {0} compilation failed! \n", m_program);
+            std::ostringstream out;
+            for (GLchar in : infoLog) {
+                out << in;
+            }
+            std::string s(out.str());
+            CORE_LOG_ERROR("Platform::GL_shader:: Could not link shader program. Error code:\n{0}", s);
         }
 //        } else {
 //

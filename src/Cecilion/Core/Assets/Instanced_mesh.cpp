@@ -15,7 +15,7 @@ namespace Cecilion {
 
     void
     Instanced_mesh::add_LOD(std::shared_ptr<Vertex_buffer> vertex_data, std::shared_ptr<Index_buffer> index_buffer,
-                            std::shared_ptr<Shader> shader) {
+                            const std::shared_ptr<Shader>& shader) {
         this->m_lod.emplace_back(Mesh_data{vertex_data, index_buffer}, shader, this->m_frustum_pipeline);
 
     }
@@ -25,10 +25,10 @@ namespace Cecilion {
         this->m_instance_buffer_data->resize_buffer(this->m_instance_buffer_data->get_size()+instance_data_size);
         this->m_instance_bounding_spheres->resize_buffer(this->m_instance_bounding_spheres->get_size() + this->m_instance_bounding_spheres->get_layout().get_stride());
 
-        this->m_instance_buffer_data->set_sub_data(data, this->instances*instance_data_size, instance_data_size);
+        this->m_instance_buffer_data->set_sub_data(data, this->m_instances * instance_data_size, instance_data_size);
         float sphere[] = {position.x, position.y, position.z, radius};
-        this->m_instance_bounding_spheres->set_sub_data(sphere, this->instances*m_instance_bounding_spheres->get_layout().get_stride(), m_instance_bounding_spheres->get_layout().get_stride());
-        this->instances ++;
+        this->m_instance_bounding_spheres->set_sub_data(sphere, this->m_instances * m_instance_bounding_spheres->get_layout().get_stride(), m_instance_bounding_spheres->get_layout().get_stride());
+        this->m_instances ++;
     }
 
     void Instanced_mesh::on_render() {
@@ -41,7 +41,7 @@ namespace Cecilion {
         this->m_frustum_pipeline->execute();
     }
 
-    Instanced_mesh::Mesh_LOD::Mesh_LOD(Mesh_data mesh, std::shared_ptr<Shader> shader,
+    Instanced_mesh::Mesh_LOD::Mesh_LOD(const Mesh_data& mesh, std::shared_ptr<Shader> shader,
                                        std::shared_ptr<Frustum_compute_query> frustum_pipeline) : m_frustum_pipeline(frustum_pipeline) {
         this->m_vao = std::shared_ptr<Cecilion::Vertex_array>(Cecilion::Vertex_array::Create());
         this->m_vao->add_vertex_buffer(mesh.p_buffer,0);
@@ -49,15 +49,12 @@ namespace Cecilion {
         this->m_vao->add_vertex_buffer(frustum_pipeline->get_result_buffer(),1);
         this->m_vao->set_index_buffer(mesh.p_index_buffer);
 
-        this->m_shader = shader;
+        this->m_shader = std::move(shader);
     }
 
     void Instanced_mesh::Mesh_LOD::on_render() {
-        this->m_shader->bind();
-        {
-            CECILION_PROFILE_FUNCTION();
-            Cecilion::Renderer::submit_instanced(this->m_vao, this->m_frustum_pipeline->fetch_result());
-        }
+        this->m_shader->bind();     /// TODO This should be a part of the renderer.
+        Cecilion::Renderer::submit_instanced(this->m_vao, this->m_frustum_pipeline->fetch_result());
         this->m_shader->unbind();
     }
 }

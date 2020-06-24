@@ -5,6 +5,11 @@
 #include <vector>
 #include <Core/Log.h>
 namespace Cecilion {
+
+    /**
+     * This class holds all application layer groups.
+     * TODO It's not possible to remove layers.
+     */
     class Layer_stack {
         using ID = int;
     public:
@@ -17,18 +22,18 @@ namespace Cecilion {
             return id_counter++;
         }
 
+        /**
+         * Update all layer groups from front to back.
+         */
         void on_update() {
-//            CORE_LOG_INFO("Updating layers...");
             for (auto& group : this->m_groups) {
-//                CORE_LOG_INFO("Updating layer");
                 group->on_update();
             }
-//            CORE_LOG_INFO("Done with the updates");
         }
 
         /**
          * Append a new layer to the current active layer group.
-         * @param layer
+         * @param layer - The layer you want to put on top.
          */
         template<typename... Events>
         void append_layer(std::unique_ptr<Layer<Events...>> layer) {
@@ -72,8 +77,13 @@ namespace Cecilion {
         }
     private:
 
+        /**
+         * Use this whenever a layer requests a new event subscription.
+         * @tparam Event
+         */
         template<typename Event>
         void add_subscription() {
+            /// Check if the subscription does not exist yet, then add a callback subscription to the event.
             if (std::find(this->subscriptions.begin(), this->subscriptions.end(), typeid(Event)) == this->subscriptions.end()) {
                 Event_system::subscribe_to<Event>([this](auto ID){
                     auto iterator = this->m_groups.rbegin();
@@ -85,6 +95,13 @@ namespace Cecilion {
                     }
                 });
             }
+        }
+
+        /**
+         * This function is empty.
+         */
+        void remove_subscription() {
+            /// TODO Big todo.
         }
 
         std::vector<std::shared_ptr<Layer_group>> m_groups;

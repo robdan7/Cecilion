@@ -7,7 +7,7 @@ add_library(Cecilion_renderer STATIC
         Camera.cpp
         Shader.cpp
         Frustum_compute_query.cpp
-        Distance_compute_query.cpp)
+        )
 target_link_libraries(Cecilion_renderer PUBLIC glm_static PRIVATE Cecilion_Log OpenGL_renderer)
 target_include_directories(Cecilion_renderer PRIVATE ${CECILION_HEADER})
 target_include_directories(Cecilion_renderer PUBLIC ${PROJECT_SOURCE_DIR}/include/glm)

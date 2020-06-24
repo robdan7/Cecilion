@@ -3,6 +3,12 @@
 #include <Utils/Sparse_set.h>
 namespace Cecilion {
 
+    /**
+     * Extension of the sparse set class. This also stores Components in the same format as
+     * the packed vector in a sparse set.
+     * @tparam Entity
+     * @tparam Component
+     */
     template<typename Entity, typename Component>
     class Component_storage : public Sparse_set<Entity>{
     public:

@@ -24,13 +24,20 @@ namespace Cecilion {
             /// The user should give up ownership of the layer, but we need to share it internally.
             std::shared_ptr<Layer<Events...>> pointer = std::shared_ptr<Layer<Events...>>(layer.release());
 
-            /** Call the quick fix function for all parameters. */
+            /** Call the quick fix function for all event types. */
             (this->set_callback<Events>(pointer),...);
             this->m_layers.push_back(pointer);
             pointer->on_attach();
         }
         void hide() {this->visible = false;}
         void show() {this->visible = true;}
+
+        /**
+         * Try to handle an event.
+         * @tparam Event - the event type
+         * @param event_ID - The unique event ID.
+         * @return - The function returns true only if the event was taken care of.
+         */
         template<typename Event>
         bool try_forward(unsigned int event_ID) {
             if (!this->visible) {return false;}
@@ -41,6 +48,9 @@ namespace Cecilion {
             return false;
         }
 
+        /**
+         * Update all layers from front to back.
+         */
         void on_update() {
             if (!this->visible) {return;}
             for (auto& layer: this->m_layers) {

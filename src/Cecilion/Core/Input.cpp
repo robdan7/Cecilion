@@ -1,10 +1,4 @@
-//
-// Created by Robin on 2020-03-29.
-//
-
 #include "Input.h"
-//#include "Keycodes.h"
-//#include "Mouse_button_codes.h"
 #include <Event/Event_system.h>
 namespace Cecilion {
     /**
@@ -39,7 +33,6 @@ namespace Cecilion {
  * @param button
  */
     void Input::notify_mouse_button(int button, int action) {
-            std::cout <<"DDDD" << std::endl;
             Event_system::post<Cecilion::Mouse_button_Event>(button, action);
     }
 

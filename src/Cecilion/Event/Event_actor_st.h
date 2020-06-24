@@ -14,14 +14,12 @@ namespace Cecilion {
     class Event_actor_st : public Event_actor<Events...> {
     public:
 
-
-
         Event_actor_st() : Event_actor<Events...>() {
             this->init_subscriptions();
         }
 
         /**
-         * Just an update method. This is all you need to call.
+         * Just an update method. This is all you need to call in order to execute cached events.
          */
         void on_update() {
             this->check_inbox();

@@ -13,12 +13,10 @@
 int main(int argc, char **argv) {
     Cecilion::Log::Init();
     CORE_LOG_INFO("Initialized log!");
-//    Cecilion::Event_system::Init();
     CORE_LOG_INFO("Entry point says hello!");
 
     auto app = Cecilion::CreateApplication();
-//    CECILION_PROFILE_BEGIN_SESSION("Running", "Renderer.json");
     app->run();
-//    CECILION_PROFILE_END_SESSION();
+
     delete app;
 }

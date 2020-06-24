@@ -47,7 +47,8 @@ namespace Cecilion {
 
         const GLubyte* vendor = glGetString(GL_VENDOR); // Returns the vendor
         const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
-        CORE_LOG_INFO("Created graphics context.\n    Vendor: {0}\n    Model: {1}", (char*)vendor,(char*)renderer);
+        const GLubyte* version = glGetString(GL_VERSION);
+        CORE_LOG_INFO("Platform::Windows::W_window:: Created graphics context.\n    Vendor: {0}\n    Model: {1}\n    Version: {2}", (char*)vendor,(char*)renderer, (char*)version);
 
         glfwSetWindowUserPointer(this->m_window, this);
         this->set_Vsync(this->m_data->vsync);

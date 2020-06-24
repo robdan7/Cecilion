@@ -28,5 +28,6 @@ namespace Cecilion {
         std::unique_ptr<GL_vertex_array> m_vao;
         uint32_t m_last_frustum_query;
         bool m_has_updated = false;
+        uint32_t m_TFO;
     };
 }

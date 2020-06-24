@@ -6,8 +6,6 @@
 #include <typeindex>
 #include <unordered_map>
 #include <Utils/Sparse_set.h>
-#include <algorithm>
-#include <iostream>
 #include <functional>
 #include "System_events.h"
 

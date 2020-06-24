@@ -4,8 +4,8 @@
 #include <Platform/OpenGL/GL_context.h>
 #include "Renderer/Renderer_API.h"
 
-/// The following function created the graphics API
 namespace Cecilion {
+/// The following functions creates the graphics API
     GLFW_context* create_engine_context() {
         #ifdef API_OPENGL   // Must be defined by the user.
             return new Cecilion::GL_context();

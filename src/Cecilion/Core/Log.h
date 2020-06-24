@@ -3,7 +3,8 @@
 #include "spdlog/spdlog.h"
 namespace Cecilion {
     /**
-     * Simple logging class. This should be extended so the application can throw exceptions and such.
+     * Simple logging class.
+     * TODO This should be extended so the application can throw exceptions and such.
      */
     class Log {
     public:
