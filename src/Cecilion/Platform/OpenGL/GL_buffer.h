@@ -47,10 +47,10 @@ namespace Cecilion {
     /**
      * Also known as uniform buffers.
      */
-    class GL_shader_param_buffer : public Shader_param_buffer {
+    class GL_constant_buffer : public Constant_buffer {
     public:
-        GL_shader_param_buffer(void* vertices, uint32_t size, Access_frequency frequency, Access_type type);
-        GL_shader_param_buffer(uint32_t size, Access_frequency frequency, Access_type type);
+        GL_constant_buffer(void* vertices, uint32_t size, Access_frequency frequency, Access_type type);
+        GL_constant_buffer(uint32_t size, Access_frequency frequency, Access_type type);
         void bind() override;
 
         void unbind() override;

@@ -6,7 +6,7 @@
 #include "OpenGL.h"
 #include <Core/Log.h>
 namespace Cecilion {
-    uint32_t GL_shader_param_buffer::bindings = 0;
+    uint32_t GL_constant_buffer::bindings = 0;
 
     class GL_Raw_buffer {
     public:
@@ -168,41 +168,41 @@ namespace Cecilion {
 
     /// -------------- Uniform buffer --------------
 
-    void GL_shader_param_buffer::bind() {
+    void GL_constant_buffer::bind() {
         GL_Raw_buffer::bind(GL_UNIFORM_BUFFER, this->m_buffer_ID);
     }
 
-    void GL_shader_param_buffer::unbind() {
+    void GL_constant_buffer::unbind() {
         GL_Raw_buffer::unbind(GL_UNIFORM_BUFFER);
     }
 
-    void GL_shader_param_buffer::reset_buffer(float *vertices, uint32_t size) {
+    void GL_constant_buffer::reset_buffer(float *vertices, uint32_t size) {
         GL_Raw_buffer::reset_buffer(GL_UNIFORM_BUFFER, this->m_buffer_ID, vertices, size, this->m_GL_draw_type);
         this->set_size(size);
     }
 
-    void GL_shader_param_buffer::set_sub_data(float *vertices, uint32_t offset, uint32_t size) {
+    void GL_constant_buffer::set_sub_data(float *vertices, uint32_t offset, uint32_t size) {
         GL_Raw_buffer::set_sub_data(GL_UNIFORM_BUFFER,this->m_buffer_ID, vertices, offset, size);
     }
 
-    void GL_shader_param_buffer::resize_buffer(uint32_t size) {
+    void GL_constant_buffer::resize_buffer(uint32_t size) {
         GL_Raw_buffer::resize_buffer(GL_UNIFORM_BUFFER, this->m_buffer_ID, this->get_size(), size,this->m_GL_draw_type);
         this->set_size(size);
     }
 
-    GL_shader_param_buffer::GL_shader_param_buffer(void *vertices, uint32_t size,
-                                                   Raw_buffer::Access_frequency frequency,
-                                                   Raw_buffer::Access_type type) : Shader_param_buffer(size){
+    GL_constant_buffer::GL_constant_buffer(void *vertices, uint32_t size,
+                                           Raw_buffer::Access_frequency frequency,
+                                           Raw_buffer::Access_type type) : Constant_buffer(size){
         this->m_GL_draw_type = GL_Raw_buffer::calc_draw_type(frequency, type);
         this->m_buffer_ID = GL_Raw_buffer::init(vertices, size, this->m_GL_draw_type, GL_UNIFORM_BUFFER);
         this->m_binding_point = bindings++;
         glBindBufferBase(GL_UNIFORM_BUFFER, this->m_binding_point, this->m_buffer_ID);
     }
 
-    GL_shader_param_buffer::GL_shader_param_buffer(uint32_t size,
-            Raw_buffer::Access_frequency frequency,
-            Raw_buffer::Access_type type) :
-            GL_shader_param_buffer(nullptr, size, frequency, type) {
+    GL_constant_buffer::GL_constant_buffer(uint32_t size,
+                                           Raw_buffer::Access_frequency frequency,
+                                           Raw_buffer::Access_type type) :
+            GL_constant_buffer(nullptr, size, frequency, type) {
     }
 
 

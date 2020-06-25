@@ -233,15 +233,15 @@ namespace Cecilion {
     };
 
     /**
-     * Class for storing global shader parameters that are not shader or
+     * Class for storing global and constant shader parameters that are not shader or
      * model specific. The OpenGL equivalent to this would be global uniforms.
      */
-    class Shader_param_buffer : public Raw_buffer {
+    class Constant_buffer : public Raw_buffer {
     public:
-        static std::shared_ptr<Shader_param_buffer> Create(void* vertices, uint32_t size, Raw_buffer::Access_frequency frequency, Raw_buffer::Access_type type);
+        static std::shared_ptr<Constant_buffer> Create(void* vertices, uint32_t size, Raw_buffer::Access_frequency frequency, Raw_buffer::Access_type type);
         virtual uint32_t get_ID() = 0;
     protected:
-        Shader_param_buffer(uint32_t size) : Raw_buffer(size) {}
+        Constant_buffer(uint32_t size) : Raw_buffer(size) {}
     };
 
 

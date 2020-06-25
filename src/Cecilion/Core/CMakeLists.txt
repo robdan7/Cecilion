@@ -26,7 +26,7 @@ target_sources(Cecilion_Core
         Assets/Instanced_mesh.cpp
         )
 target_include_directories(Cecilion_Core PRIVATE ${CECILION_HEADER})
-target_link_libraries(Cecilion_Core PUBLIC Cecilion_renderer PRIVATE Cecilion_Log Platform Cecilion_input)
+target_link_libraries(Cecilion_Core PUBLIC Cecilion_renderer Cecilion_Event PRIVATE Cecilion_Log Platform Cecilion_input)
 
 # Only precompile PUBLIC headers if they are used outside of Cecilion_Core.
 target_precompile_headers(Cecilion_Core PUBLIC Window.h Mouse_button_codes.h Keycodes.h Application.h Layers/Layer.h PRIVATE Layers/Layer_stack.h Layers/Layer_group.h)

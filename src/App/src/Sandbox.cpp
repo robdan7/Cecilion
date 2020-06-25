@@ -141,104 +141,15 @@ private:
     Cecilion::Filter<> filter;
 };
 
-/// Test code for global shader parameters.
-/// ------ Shader param data ------
-struct Base_container;
 
-struct I_data : public Cecilion::Buffer_element {
-private:
-    uint32_t offset;
-public:
-    virtual void* get_data() = 0;
-    [[nodiscard]] uint32_t get_offset() const {return offset;}
-    virtual uint32_t stride() = 0;
-    uint32_t get_offset() {return this->offset;}
-    I_data(I_data&& other)  noexcept : offset(other.offset), Cecilion::Buffer_element(other) {}
-    I_data(uint32_t offset, Cecilion::Shader_data type, const char* name, bool normalized = false) : Cecilion::Buffer_element(type,name,normalized),offset(offset) {}
-};
-
-struct Float_data : public I_data{
-    float my_float = 0;
-    Float_data(uint32_t offset, const char* name, bool normalized = false) : I_data(offset, Cecilion::Shader_data::Float, name, normalized){}
-    Float_data(Float_data &&other) : I_data(static_cast<I_data&&>(other)) {
-        this->my_float = other.my_float;
-    }
-
-    void* get_data() override {
-        return &this->my_float;
-    }
-    uint32_t stride() {
-        return sizeof(my_float);
-    }
-};
-
-struct Int_data : public I_data {
-    int my_data = 0;
-    Int_data(uint32_t offset, const char* name, bool normalized = false) : I_data(offset, Cecilion::Shader_data::Int, name, normalized){}
-    Int_data(Int_data &&other) : I_data(static_cast<I_data&&>(other)) {
-        this->my_data = other.my_data;
-    }
-
-    void *get_data() override {
-        return &this->my_data;
-    }
-    uint32_t stride() {return this->my_data;}
-};
-
-struct Matrix_data : public I_data {
-    glm::mat4x4 my_matrix = glm::mat4x4(1.0f);
-    Matrix_data(uint32_t offset, const char* name, bool normalized = false) : I_data(offset, Cecilion::Shader_data::Mat4, name, normalized){}
-
-    Matrix_data(Matrix_data &&other) : I_data(static_cast<I_data&&>(other)) {
-        this->my_matrix = other.my_matrix;
-    }
-
-    void *get_data() override {
-        return &this->my_matrix[0][0];
-    }
-    uint32_t stride() {return sizeof(my_matrix);}
-};
-
-
-/// ------- Base class for shader params ------
-
-struct Base_container {
-private:
-protected:
-    uint32_t size = 0;
-    template<typename Arg>
-    Arg set_arg(const char* name) {
-        Arg a = Arg(size,name,false);
-        this->size += a.stride();
-        return std::move(a);
-    }
-public:
-    [[nodiscard]] uint32_t get_size() const {return this->size;}
-    Base_container() = default;
-};
-#define BEGIN_SHADER_PARAMS(Name) struct Name : public Base_container { std::shared_ptr<Cecilion::Shader_param_buffer> m_buffer;\
-Name() : Base_container() {this->m_buffer = Cecilion::Shader_param_buffer::Create(nullptr, this->get_size(), Cecilion::Vertex_buffer::Access_frequency::DYNAMIC, Cecilion::Vertex_buffer::Access_type::DRAW);} \
-void write(I_data* data) { \
-    this->m_buffer->set_sub_data((float*)data->get_data(), data->get_offset(),data->stride());\
-}
-#define SET_SHADER_PARAM(type, name) type name = this->set_arg<type>(#name);
-#define END_SHADER_PARAMS(Name) };
-
-/// ------ User defined shader params -------
-
-BEGIN_SHADER_PARAMS(Data_container)
-    SET_SHADER_PARAM(Float_data, scale)
-END_SHADER_PARAMS(Data_container)
-
-/// ---------------------------------------
 
 class App : public Cecilion::Application {
 public :
     App() {
 
-        Data_container c = Data_container();
-        c.scale.my_float = 1;
-        c.write((I_data*)&c.scale);
+//        Data_container c = Data_container();
+//        c.scale.my_float = 1;
+//        c.write((I_data*)&c.scale);
 
 
 //        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(new Example_layer<>())));
