@@ -95,16 +95,25 @@ namespace Cecilion {
         }
 
         virtual void remove(Type ID) {
-            Type replacement = this->packed_list.back();
+            // TODO This is not working
+//            Type replacement_ID = this->packed_list.back();
             std::size_t ID_page = page(ID);
             std::size_t ID_offset = offset(ID);
 
             /// Let the replacement ID point to the deleted index.
-            sparse_list[page(replacement)][offset(replacement)] = sparse_list[ID_page][ID_offset];
-            sparse_list[ID_page][ID_offset] = NULL_POINTER;
-            /// Move the replacement ID to the new index.
-            packed_list[ID] = replacement;
-            packed_list.pop_back();
+//            sparse_list[page(replacement_ID)][offset(replacement_ID)] = sparse_list[ID_page][ID_offset];
+//            sparse_list[ID_page][ID_offset] = NULL_POINTER;
+//            /// Move the replacement ID to the new index.
+//            packed_list[ID] = replacement_ID;
+//            packed_list.pop_back();
+            
+            
+            Type back_ID = this->packed_list.back();
+            auto delete_index = sparse_list[ID_page][ID_offset];
+            this->sparse_list[ID_page][ID_offset] = NULL_POINTER;
+            sparse_list[page(back_ID)][offset(back_ID)] = delete_index;
+            this->packed_list[delete_index] = back_ID;
+            this->packed_list.pop_back();
         }
 
         bool has_ID(Type ID) const {
@@ -134,6 +143,7 @@ namespace Cecilion {
 
     protected:
          std::vector<std::unique_ptr<Type[]>> sparse_list;
+    public:
          std::vector<Type> packed_list;
          const Type NULL_POINTER = std::numeric_limits<Type>::max();
     };
