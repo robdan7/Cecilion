@@ -127,4 +127,16 @@ namespace Cecilion {
         glViewport(0,0, this->m_data->width, this->m_data->height);
     }
 
+    void W_window::show_cursor() {
+        glfwSetInputMode(this->m_window,GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+
+    void W_window::hide_cursor() {
+        glfwSetInputMode(this->m_window,GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    }
+
+    void W_window::disable_cursor() {
+        glfwSetInputMode(this->m_window,GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+
 }

@@ -43,7 +43,11 @@ namespace Cecilion {
                     /** This fetches a copy of the event from the event system
                      *  and dispatches the callback function.
                      **/
-                    this->callback(Event_system::fetch_event<Event>(event));
+//                     if (Event_system::has_event<Event>(event)) {
+                         this->callback(Event_system::fetch_event<Event>(event));
+//                     } else {
+//                         CORE_LOG_ERROR("Event system did not have event {0} of type {1}", event, typeid(Event).name());
+//                     }
                 }
                 this->incoming_events.clear();
             }

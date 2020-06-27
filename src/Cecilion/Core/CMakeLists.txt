@@ -14,6 +14,7 @@ target_precompile_headers(Cecilion_Log PUBLIC Log.h)
 # --- Add input library ---
 add_library(Cecilion_input STATIC "")
 target_sources(Cecilion_input PUBLIC Input.cpp)
+target_link_libraries(Cecilion_input PRIVATE Cecilion_Log)
 target_precompile_headers(Cecilion_input PUBLIC Input.h)
 target_include_directories(Cecilion_input PRIVATE ${CECILION_HEADER})
 

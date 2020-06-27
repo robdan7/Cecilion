@@ -8,6 +8,7 @@
 #include <Utils/Sparse_set.h>
 #include <functional>
 #include "System_events.h"
+#include <Core/Log.h>
 
 namespace Cecilion {
     using Event_ID_length = uint16_t;
@@ -21,6 +22,19 @@ namespace Cecilion {
     template<typename Event_type>
     class Event_list : public I_Event_list{
     public:
+//        bool has_event(Event_ID_length event_ID) {
+//            if (this->sparse_set.has_ID(event_ID)) {
+//                int index = this->sparse_set.index(event_ID);
+//                if (index < this->events.size()) {
+//                    return true;
+//                }
+//                return false;
+//            } else {
+//                return false;
+//            }
+////            return this->sparse_set.has_ID(event_ID) && this->sparse_set.index(event_ID) < this->events.size();
+//        }
+
         /**
          * Return a copy of an event. Not a reference.
          * @param event_ID
@@ -29,6 +43,7 @@ namespace Cecilion {
             this->event_m.lock();
             const auto index = this->sparse_set.index(event_ID);
             auto event = this->events.at(index).event;
+
             if (!(--this->events.at(index).ref_counter)) {
                 this->events.at(index) = this->events.back();
                 this->events.pop_back();
@@ -54,7 +69,6 @@ namespace Cecilion {
             this->actor_m.lock();
             this->events.push_back(Event_container{this->function_callbacks.size(), Event_type(args...)});
             this->event_m.unlock();
-            // TODO Do callbacks.
             for (auto callback : this->function_callbacks) {
                 callback(event_ID);
             }
@@ -101,6 +115,10 @@ namespace Cecilion {
 
     class Event_system {
     public:
+        template<typename Event>
+        static bool has_event(Event_ID_length event_ID) {
+            return static_cast<Event_list <Event>*>(event_containers.at(typeid(Event)))->has_event(event_ID);
+        }
 
         template<typename Event>
         static Event fetch_event(Event_ID_length event_ID) {
@@ -141,6 +159,8 @@ namespace Cecilion {
         static void post(Args&&... args) {
             if (event_containers.contains(typeid(Event))) {
                 static_cast<Event_list<Event>*>(event_containers.at(typeid(Event)))->template send_event<Args...>(std::forward<Args>(args)...);
+            } else {
+//                CORE_LOG_WARN("No actor is listening to event {0}", typeid(Event).name());
             }
         }
 

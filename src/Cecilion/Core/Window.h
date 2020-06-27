@@ -34,5 +34,8 @@ namespace Cecilion {
         virtual bool has_Vsync() const = 0;
         static Window* create_window(Window_properties properties = Window_properties());
         virtual void* get_native_window() = 0;
+        virtual void show_cursor() = 0;
+        virtual void hide_cursor() = 0;
+        virtual void disable_cursor() = 0;
     };
 }

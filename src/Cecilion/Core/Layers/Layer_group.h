@@ -41,8 +41,10 @@ namespace Cecilion {
         template<typename Event>
         bool try_forward(unsigned int event_ID) {
             if (!this->visible) {return false;}
-            if (this->m_callback_mappings.find(typeid(Event)) != this->m_callback_mappings.end()) {
-                std::static_pointer_cast<Layer<Event>>(this->m_callback_mappings[typeid(Event)])->template notify_me<Event>(event_ID);  // forward event to inbox.
+            if (this->m_callback_functions.find(typeid(Event)) != this->m_callback_functions.end()) {
+//                this->m_callback_functions[typeid(Event)](event_ID);
+                this->m_callback_functions[typeid(Event)].callback(event_ID, this->m_callback_functions[typeid(Event)].layer);
+//                std::static_pointer_cast<Layer<Event>>(this->m_callback_mappings[typeid(Event)])->template notify_me<Event>(event_ID);  // forward event to inbox.
                 return true;
             }
             return false;
@@ -69,11 +71,29 @@ namespace Cecilion {
          */
         template<typename Event, typename... Events>
         void set_callback(std::shared_ptr<Layer<Events...>> layer) {
-                this->m_callback_mappings[typeid(Event)] = layer;
+//                this->m_callback_mappings[typeid(Event)] = layer;
+            this->m_callback_functions[typeid(Event)] = {layer,
+                [](unsigned int event, std::shared_ptr<I_Layer> layer){
+                    std::static_pointer_cast<Layer<Events...>>(layer)->template notify_me<Event>(event);  // forward event to inbox.
+                }
+            };
+//            std::weak_ptr<Layer<Events...>> pointer(layer);
+//            this->m_callback_functions[typeid(Event)] = [pointer]<Events>(unsigned int event){
+//                auto object = pointer.lock();
+//                if (object) {
+//                    object->template notify<Events...>(event);
+//                }
+////                    std::static_pointer_cast<Layer<Events...>>(this->m_layers[size])-> template notify_me<Event>(event);  // forward event to inbox.
+//            };
         }
     private:
+        struct Callback_container {
+                    std::shared_ptr<I_Layer> layer;
+                    std::function<void(unsigned int, std::shared_ptr<I_Layer>)> callback;
+                };
         std::vector<std::shared_ptr<I_Layer>> m_layers;
-        std::unordered_map<std::type_index, std::shared_ptr<I_Layer>> m_callback_mappings;
+//        std::unordered_map<std::type_index, std::shared_ptr<I_Layer>> m_callback_mappings;
+        std::unordered_map<std::type_index, Callback_container> m_callback_functions;
         bool visible = true;
     };
 }

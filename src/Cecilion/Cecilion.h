@@ -2,6 +2,7 @@
 
 #include "Core/Core.h"
 #include "Platform/Platform.h"
+#include <Platform/OpenGL/GL_shader.h>
 
 #include "ImGui/ImGui_layer.h"
 #include "Platform/Windows/W_window.h"

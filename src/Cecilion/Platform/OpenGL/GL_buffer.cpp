@@ -1,7 +1,7 @@
 //
 // Created by Robin on 2020-04-03.
 //
-
+#include <fstream>
 #include "GL_buffer.h"
 #include "OpenGL.h"
 #include <Core/Log.h>
@@ -98,8 +98,20 @@ namespace Cecilion {
             glBindBuffer(GL_COPY_READ_BUFFER, 0);
         }
 
-        static void delete_buffer(uint8_t ID) {
+        static void delete_buffer(uint32_t ID) {
             glDeleteBuffers(1, reinterpret_cast<const GLuint *>(&ID));
+        }
+
+        static void dump_to_file(const char* file, uint32_t ID, uint32_t size) {
+            glBindBuffer(GL_COPY_READ_BUFFER, reinterpret_cast<GLuint>(ID));
+            char data[size];
+            glGetBufferSubData(GL_COPY_READ_BUFFER, 0, size, &data);
+
+            /// Get transform feedback primitives.
+            std::ofstream output_file;
+            output_file.open(file);
+            output_file.write(data, size);
+            output_file.close();
         }
     };
 
@@ -144,6 +156,10 @@ namespace Cecilion {
     void GL_vertex_buffer::resize_buffer(uint32_t size) {
         GL_Raw_buffer::resize_buffer(GL_ARRAY_BUFFER, this->m_buffer_ID, this->get_size(), size,this->m_GL_draw_type);
         this->set_size(size);
+    }
+
+    void GL_vertex_buffer::dump_to_file(const char *file) {
+        GL_Raw_buffer::dump_to_file(file, this->get_ID(), this->get_size());
     }
 
     /// -------------- Index buffer --------------
@@ -205,6 +221,9 @@ namespace Cecilion {
             GL_constant_buffer(nullptr, size, frequency, type) {
     }
 
+    void GL_constant_buffer::dump_to_file(const char *file) {
+        GL_Raw_buffer::dump_to_file(file, this->get_ID(), this->get_size());
+    }
 
 
 }

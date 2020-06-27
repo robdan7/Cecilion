@@ -16,6 +16,13 @@ namespace Cecilion {
         [[nodiscard]] bool has_Vsync() const override;
         void activate_resize();
         inline void* get_native_window() override {return this->m_window;}
+
+        void show_cursor() override;
+
+        void hide_cursor() override;
+
+        void disable_cursor() override;
+
     private:
 
         virtual void shutdown();

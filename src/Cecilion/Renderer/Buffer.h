@@ -194,6 +194,7 @@ namespace Cecilion {
         virtual void resize_buffer(uint32_t size) = 0;
 
         uint32_t get_size() {return this->m_size;}
+        virtual void dump_to_file(const char* file) = 0;
     protected:
         Raw_buffer(uint32_t size) : m_size(size){}
         void set_size(uint32_t size) {this->m_size = size;}
