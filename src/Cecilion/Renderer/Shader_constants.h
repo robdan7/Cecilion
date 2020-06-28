@@ -221,15 +221,15 @@ public:
 //    END_SHADER_CONST(Data_container)
     class System_shader_constants;
     BEGIN_SHADER_CONST(CL_System_params, System_shader_constants)
-        SET_SHADER_CONST(Matrix4_data, CL_Viewport)
+        SET_SHADER_CONST(Matrix4_data, CL_View_matrix)             /// world view matrix
+        SET_SHADER_CONST(Matrix4_data, CL_Projection_matrix)  /// view and projection matrix
+        SET_SHADER_CONST(Float3_data, CL_Center_reference)      /// main camera position
         SET_SHADER_CONST(Float_data, CL_Time)
     END_SHADER_CONST(CL_System_params)
 
-    CL_System_params* params;
+    void init_shader_constants();
 
-    void init_shader_constants() {
-        params = new CL_System_params();
-    }
+    CL_System_params* get_system_params();
 
     /**
      * Governor class for CL_System_params

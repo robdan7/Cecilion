@@ -52,6 +52,13 @@ namespace Cecilion {
 //                float radius;
             } vertex_data;
 
+            uniform Uniform_block {
+                mat4 view_matrix;
+                mat4 projection_matrix;
+                vec3 CL_Center_reference;
+                float scale;
+            } my_block;
+
         )";
 
         std::string data[this->m_result_buffer->get_layout().get_elements().size()];
@@ -72,7 +79,13 @@ namespace Cecilion {
         vertex_shader += R"(
             } instance_output;
             void main() {
-                vertex_data.position = in_position;
+                vec4 view_position = my_block.view_matrix*vec4(in_position.x,in_position.y,in_position.z,1);
+                vertex_data.position = my_block.projection_matrix *view_position;
+                vertex_data.position /= vertex_data.position.w;
+                vec4 radius = my_block.projection_matrix *vec4(in_position.w,0,view_position.z,1);
+                vertex_data.position.w = radius.x/radius.w;     // radius
+
+
 //                vertex_data.radius = in_radius;
             )";
         iterator = this->m_result_buffer->get_layout().begin();
@@ -118,8 +131,8 @@ namespace Cecilion {
         geometry += R"(
             void main() {
 //                for (int i = 0; i < gl_in.length(); i++) {
-//                    vec3 abs_position = abs(vertex_data[i].position.xyz);
-//                    if (vertex_data[i].position.x < 0.5f) {
+                    vec3 abs_position = abs(vertex_data[0].position.xyz)-vertex_data[0].position.w;
+                    if (abs_position.x < 1 && abs_position.y < 1) {
             )";
 
         std::string stream = std::to_string(1);
@@ -133,19 +146,18 @@ namespace Cecilion {
         geometry += R"(
                 EmitStreamVertex(gl_InvocationID);
                 EndStreamPrimitive(gl_InvocationID);
+                }
             }
             )";
-
-        std::ofstream myfile;
-        myfile.open("geometry_shader.txt");
-        myfile << geometry;
-        myfile.close();
 
         auto geometry_stage = std::make_shared<GL_shader_stage>(OPENGL_GEOMETRY_SHADER, std::move(geometry));
 
         this->shader_program = std::unique_ptr<GL_shader>(new GL_shader({vertex_stage, geometry_stage}));
         this->shader_program->compile();
         this->shader_program->bind();
+
+        GLuint index= glGetUniformBlockIndex(shader_program->get_ID(), "Uniform_block");
+        glUniformBlockBinding(shader_program->get_ID(), index,0);
 
         this->m_vao = std::make_unique<GL_vertex_array>();
         this->m_vao->add_vertex_buffer(this->m_vertices, 0);

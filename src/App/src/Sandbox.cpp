@@ -6,9 +6,7 @@
 
 #define API_OPENGL
 #include <Cecilion.h>
-#include <Renderer/Shader_constants.h>
-#include <tuple>
-//#include <Core/Keycodes.h>
+
 
 std::shared_ptr<Cecilion::Shader> create_shader() {
     auto vert = Cecilion::Shader::create_shader_stage(OPENGL_VERTEX_SHADER, R"(
@@ -26,18 +24,21 @@ std::shared_ptr<Cecilion::Shader> create_shader() {
 //            } another_block;
 
             uniform Uniform_block {
-                mat4 matrix;
+                mat4 view_matrix;
+                mat4 projection_matrix;
+                vec3 CL_Center_reference;
                 float scale;
             } my_block;
 
 
 
             void main() {
+                vec4 position = my_block.projection_matrix * my_block.view_matrix*matrix*in_position;
                 vertex_color = instance_color;
-                vec4 position = in_position;
+
 //                position.x += my_block.scale;
 //                position.x += my_block.testz.z;
-                gl_Position =my_block.matrix*matrix* position;
+                gl_Position =position;
             }
             )");
 
@@ -71,11 +72,11 @@ std::shared_ptr<Cecilion::Shader> create_shader(const char* name) {
 }
 
 std::shared_ptr<Cecilion::Vertex_buffer> create_buffer() {
-    float vertices[4 * (2)] = {
-            -0.1f, -0.1f, //0.0f,1, //0, 0.3, 1, 1.0,
-            0.0f, -0.1f, //0.0f,1,  //0.9, 1, 0.2, 1.0,
-            0.0f, 0.0f, //0.0f,1,   //0.9, 0.3, 0.2, 1.0,
-            -0.1f, 0.0f, //0.0f,1//,  0.9, 0.3, 0.2, 1.0
+    float vertices[4 * (4)] = {
+            -0.12f, -0.12f, 0.0f,1, //0, 0.3, 1, 1.0,
+            0.12f, -0.12f, 0.0f,1,  //0.9, 1, 0.2, 1.0,
+            0.12f, 0.12f, 0.0f,1,   //0.9, 0.3, 0.2, 1.0,
+            -0.12f, 0.12f, 0.0f,1//,  0.9, 0.3, 0.2, 1.0
     };
     std::shared_ptr<Cecilion::Vertex_buffer> vertex_buffer =
             Cecilion::Vertex_buffer::Create(
@@ -85,7 +86,7 @@ std::shared_ptr<Cecilion::Vertex_buffer> create_buffer() {
                     Cecilion::Vertex_buffer::Access_type::DRAW);
 
     Cecilion::Buffer_layout layout = {
-            {Cecilion::Shader_data::Float2, "position"}
+            {Cecilion::Shader_data::Float4, "position"}
 //            {Cecilion::Shader_data::Float4, "color"}
     };
     vertex_buffer->set_layout(layout);
@@ -110,7 +111,7 @@ public:
     }
 
 };
-
+Cecilion::Perspective_camera camera(0.001f, 100.0f, 45,1);
 /// Test layer for instanced rendering.
 class Mesh_layer : public Cecilion::Layer<> {
 public:
@@ -127,18 +128,18 @@ public:
         this->m_mesh->add_LOD(create_buffer(), create_index_buffer(), create_shader());
 
         int i = 0;
-        float size = 2;
-        for (float x = -size; x < size; x += 0.15f) {
-            for (float y = -size; y < size; y += 0.15f) {
+        float size = 5;
+        for (float x = -size; x < size; x += 0.3f) {
+            for (float y = -size; y < size; y += 0.3f) {
 
                 float matrices[16+4] = {
                         1, 0, 0, 0,
                         0, 1, 0, 0,
                         0, 0, 1, 0,
                         x, y, 0,1,
-                        0.0f,x,y,1
+                        0.0f,x/5.0f,y/5.0f,1
                 };
-                this->m_mesh->add_instance(matrices, glm::vec3{x, y, 0}, 1);
+                this->m_mesh->add_instance(matrices, glm::vec3{x, y, 0}, sqrt(2)*0.12f);
                 i++;
             }
         }
@@ -150,7 +151,7 @@ public:
         this->m_mesh->on_update();
         Cecilion::Render_command::set_clear_color({0.2f,0.2f,0.2f,1.0f});
         Cecilion::Render_command::clear();
-        Cecilion::Renderer::begin_scene();
+        Cecilion::Renderer::begin_scene(camera);
         this->m_mesh->on_render();
         Cecilion::Renderer::end_scene();
     }
@@ -160,33 +161,19 @@ private:
     Cecilion::Filter<> filter;
 };
 
-class Input_layer : public Cecilion::Layer<Cecilion::Keyboard_key_Event, Cecilion::Mouse_cursor_Event> {
+class Input_layer : public Cecilion::Layer<Cecilion::Window_resize_event, Cecilion::Keyboard_key_Event, Cecilion::Mouse_cursor_Event> {
 public:
     void on_update() override {
         this->check_inbox();
-//        test->on_update();
-//        Cecilion::Application::get().get_window().disable_cursor();
-//        Layer::on_update();
-//        this->camera.set_rotation(glm::quat(0,1,0,this->rotation));
-//        this->camera.on_update();
-//        Cecilion::params->CL_Viewport.m_data = this->camera.get_view_projection_matrix();
-//        Cecilion::params->write((Cecilion::I_data<void*>*)&Cecilion::params->CL_Viewport);
     }
-    Input_layer() : camera(0.01f, 10.0f, 45,1) {
-//        this->test = new Test();
-        this->camera.set_position(glm::vec3(0,0,6.0f));
-        this->camera.look_at(glm::vec3(-1,0,0));
-//        this->camera.set_rotation(glm::quat(0,1,0,17.0f));
-//        this->camera.set_rotation(glm::quat(0,1,0,360.0f));
-        this->camera.on_update();
-        Cecilion::params->CL_Viewport.m_data = this->camera.get_view_projection_matrix();
-        Cecilion::params->write((Cecilion::I_data<void*>*)&Cecilion::params->CL_Viewport);
+    Input_layer() {
+        camera.set_position_axis_aligned(glm::vec3(0, 0, 10.0f));
+        camera.look_at(glm::vec3(-1,0,0));
+        camera.on_update();
 
         this->set_callback<Cecilion::Mouse_cursor_Event>([this](auto event){
-            this->camera.set_rotation(event.xpos/1000,(event.ypos)/1000,0);
-            this->camera.on_update();
-            Cecilion::params->CL_Viewport.m_data = this->camera.get_view_projection_matrix();
-            Cecilion::params->write((Cecilion::I_data<void*>*)&Cecilion::params->CL_Viewport);
+            camera.set_rotation(event.xpos/1000,(event.ypos)/1000,0);
+            camera.on_update();
         });
         this->set_callback<Cecilion::Keyboard_key_Event>([this](auto event){
             LOG_INFO("User pressed key! Key state: {0}", event.action);
@@ -201,51 +188,26 @@ public:
                 }
 
             }
-//
         });
-
+        this->set_callback<Cecilion::Window_resize_event>([](Cecilion::Window_resize_event event){
+            camera.set_aspect_ratio(event.width / event.height);
+        });
     }
 private:
     bool state = false;
     float rotation = 0.0f;
-    Cecilion::Perspective_camera camera;
-//    Test* test;
 };
 
-
-
-//Cecilion::CL_System_params params;
 
 class App : public Cecilion::Application {
 public :
     App() {
-//        this->camera.set_position(glm::vec3(0,0,3.0f));
-//        this->camera.look_at(glm::vec3(0,0,-1));
-//        this->camera.set_rotation(glm::quat(0,1,0,0.0f));
-//        this->camera.on_update();
-
-        Cecilion::init_shader_constants();
-//        Cecilion::params->CL_Time.m_data = 2;
-//        Cecilion::params->CL_Viewport.m_data = this->camera.get_view_projection_matrix();
-
-//        Cecilion::params->CL_Test.m_data = glm::vec3(0.5f,0,0);
-//        Cecilion::params->write((Cecilion::I_data<void*>*)&Cecilion::params->CL_Test);
-//        Cecilion::params->write((Cecilion::I_data<void*>*)&Cecilion::params->CL_Time);
-//        Cecilion::params->write((Cecilion::I_data<void*>*)&Cecilion::params->CL_Viewport);
-
-//        Cecilion::params->m_buffer->dump_to_file("Constant_buffer.bin");
-//        Data_container c = Data_container();
-//        c.scale.my_float = 1;
-//        c.write((I_data*)&c.scale);
-
-
 //        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(new Example_layer<>())));
+        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<Cecilion::Window_resize_event, Cecilion::Keyboard_key_Event, Cecilion::Mouse_cursor_Event>>(new Input_layer())));
         this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(new Mesh_layer())));
 //        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(new Actor_layer())));
         Cecilion::Layer<>* imgui = new Cecilion::ImGui_layer();
         this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<>>(imgui)));
-
-        this->append_layer(std::move(std::unique_ptr<Cecilion::Layer<Cecilion::Keyboard_key_Event, Cecilion::Mouse_cursor_Event>>(new Input_layer())));
     }
 
     ~App() override {
@@ -257,17 +219,5 @@ private:
 };
 
 Cecilion::Application* Cecilion::CreateApplication() {
-
-//    auto lambda = []<int>(){
-//
-//    };
-//
-//    auto tup = new std::tuple<int, std::string>();
-//
-//    std::get<int>(*tup) = 2;
-//
-//    LOG_INFO("My number is {0}", std::get<int>(*tup));
-//    LOG_INFO("My number is {0}", std::get<int>(*(std::tuple<int,std::string>*)tup));
-
     return new App();
 }

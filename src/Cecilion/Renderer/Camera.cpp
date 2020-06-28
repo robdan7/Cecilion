@@ -12,6 +12,10 @@ namespace Cecilion {
         this->m_position = {0, 0, -1};
         this->m_projection_matrix = glm::perspective(fov,aspect_ratio,znear,zfar);
         this->m_view_projection_matrix = this->m_projection_matrix * this->m_view_matrix;
+        m_znear = znear;
+        m_zfar = zfar;
+        m_aspect_ratio = aspect_ratio;
+        m_fov = fov;
     }
 
     void Perspective_camera::on_update() {
@@ -40,6 +44,16 @@ namespace Cecilion {
     void Perspective_camera::set_rotation(float pitch, float yaw, float roll) {
         Camera::set_rotation(pitch, yaw, roll);
         this->m_focus = this->m_position + (glm::vec3)(glm::toMat4(this->m_rotation)* glm::vec4 (0,0,-1,0));
+    }
+
+    void Perspective_camera::set_FOV(float fov) {
+        this->m_projection_matrix = glm::perspective(fov, m_aspect_ratio, m_znear, m_zfar);
+        this->m_fov = fov;
+    }
+
+    void Perspective_camera::set_aspect_ratio(float aspect_ratio) {
+        this->m_projection_matrix = glm::perspective(m_fov, aspect_ratio, m_znear, m_zfar);
+        this->m_aspect_ratio = aspect_ratio;
     }
 
     /// ---------- Orthographic camera ----------

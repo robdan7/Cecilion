@@ -41,6 +41,7 @@ namespace Cecilion {
                 (int)this->m_data->height,
                 this->m_data->title.c_str(),
                 NULL, NULL);
+
         CORE_LOG_INFO("Created window {0} ({1}, {2})", properties.title, properties.width, properties.height);
 
         this->m_graphics_context->init(this->m_window);

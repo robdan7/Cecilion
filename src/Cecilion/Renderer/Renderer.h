@@ -1,7 +1,8 @@
 #pragma once
-
 #include "Renderer_API.h"
+
 namespace Cecilion {
+    class Camera;
     /**
      * These are planned to be the commands that the renderer actually sends when
      * it is time to render. Currently it is done whenever submit() is called, but
@@ -28,7 +29,21 @@ namespace Cecilion {
 
     class Renderer {
     public:
-        static void begin_scene();
+        /**
+         * Call this function to begin a new frame
+         * @param viewport - The main camera used for rendering. This camera
+         * will automatically be set as the target viewport unless any other is
+         * specified.
+         */
+        static void begin_scene(const Camera& viewport);
+
+        /**
+         * Set the current camera used for rendering. Updating the camera after switching to it will
+         * not update the viewport. This ensures that rendering a frame will not be affected by other
+         * updates.
+         * @param camera
+         */
+        static void switch_camera(const Camera& camera);
         static void end_scene();
         static void submit(const std::shared_ptr<Vertex_array>& vertex_array);
         static void submit_instanced(const std::shared_ptr<Vertex_array>& vertex_array, int instances);

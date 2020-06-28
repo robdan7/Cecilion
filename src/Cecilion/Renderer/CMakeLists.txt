@@ -7,6 +7,7 @@ add_library(Cecilion_renderer STATIC
         Camera.cpp
         Shader.cpp
         Frustum_compute_query.cpp
+        Shader_constants.cpp
         )
 target_link_libraries(Cecilion_renderer PUBLIC glm_static PRIVATE Cecilion_Log OpenGL_renderer)
 target_include_directories(Cecilion_renderer PRIVATE ${CECILION_HEADER})

@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <Renderer/Shader_constants.h>
 
 
 namespace Cecilion {
@@ -15,6 +16,7 @@ namespace Cecilion {
 
         this->m_window = Window::create_window();
         CORE_LOG_INFO("Application created!");
+        Cecilion::init_shader_constants();
     }
 
     Application::~Application() {

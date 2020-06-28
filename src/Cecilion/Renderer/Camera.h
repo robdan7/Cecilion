@@ -9,8 +9,16 @@ namespace Cecilion {
      */
     class Camera {
     public:
-        virtual void set_position(const glm::vec3& position) { m_position = position;}
+        virtual void set_position_axis_aligned(const glm::vec3& position) { m_position = position;}
 
+        /**
+         * Set the position relative to the current position aligned with current up
+         * and forward vectors.
+         * @param position
+         */
+        virtual void set_position_view_aligned(const glm::vec3& position) {
+
+        }
 
          /**
           *
@@ -22,9 +30,6 @@ namespace Cecilion {
             this->m_rotation.y = axis.y * sin(angle / 2);
             this->m_rotation.z = axis.z * sin(angle / 2);
             this->m_rotation.w = cos(angle / 2);
-
-//            w = cos(RotationAngle / 2)
-//            this->m_rotation = rotation;
         }
 
         virtual void set_rotation(float pitch, float yaw, float roll) {
@@ -39,10 +44,11 @@ namespace Cecilion {
             this->m_rotation.x = sr * cp * cy - cr * sp * sy;
             this->m_rotation.y = cr * sp * cy + sr * cp * sy;
             this->m_rotation.z = cr * cp * sy - sr * sp * cy;
+            this->m_up_vector = glm::toMat4(this->m_rotation) * glm::vec4(0,1,0,0);
         }
 
-        const glm::vec3& get_position() {return this->m_position;}
-        const glm::quat& get_rotation() {return this->m_rotation;}
+        const glm::vec3& get_position() const {return this->m_position;}
+        const glm::quat& get_rotation() const {return this->m_rotation;}
         const glm::mat4& get_projection_matrix() const {return this->m_projection_matrix;}
         const glm::mat4& get_view_matrix() const {return this->m_view_matrix;}
         const glm::mat4& get_view_projection_matrix() const {return this->m_view_projection_matrix;}
@@ -77,8 +83,10 @@ namespace Cecilion {
          * @param position
          */
         void look_at(const glm::vec3 &position) override;
-
+        void set_FOV(float fov);
+        void set_aspect_ratio(float aspect_ratio);
     private:
+        float m_znear, m_zfar, m_fov, m_aspect_ratio;
     };
 
     class Orthographic_camera : public Camera{
