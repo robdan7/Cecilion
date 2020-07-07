@@ -18,11 +18,11 @@ namespace Cecilion {
     }
 
     std::shared_ptr<Frustum_compute_query> Frustum_compute_query::Create(std::shared_ptr<Vertex_buffer> vertex_data_buffer, std::shared_ptr<Vertex_buffer> vertices) {
-        switch(Renderer_API::get_API()) {
-            case Renderer_API::API::OpenGL:
+        switch(Render::Renderer_API::get_API()) {
+            case Render::Renderer_API::API::OpenGL:
                 return std::make_shared<GL_Frustum_compute_query>(vertex_data_buffer, vertices);
                 break;
-            case Renderer_API::API::None:
+            case Render::Renderer_API::API::None:
                 CORE_ASSERT(false, "Renderer::Frustum_compute_query:: Could not find a render API!");
                 break;
         }

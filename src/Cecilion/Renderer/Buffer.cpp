@@ -11,11 +11,11 @@ namespace Cecilion {
      * @return
      */
     std::shared_ptr<Vertex_buffer> Cecilion::Vertex_buffer::Create(void* vertices, uint32_t size, Raw_buffer::Access_frequency frequency, Raw_buffer::Access_type type) {
-        switch (Renderer::get_API()) {
-            case Renderer_API::API::None :
+        switch (Render::Renderer::get_API()) {
+            case Render::Renderer_API::API::None :
                 CORE_ASSERT(false, "Renderer::Buffer:: No render API is defined!");
                 break;
-            case Renderer_API::API::OpenGL:
+            case Render::Renderer_API::API::OpenGL:
                 return std::static_pointer_cast<Vertex_buffer>(std::make_shared<GL_vertex_buffer>(vertices, size,frequency,type));
         }
         CORE_ASSERT(false, "Unknown Renderer_API!");
@@ -28,13 +28,13 @@ namespace Cecilion {
      * @param count
      * @return
      */
-    Index_buffer *Cecilion::Index_buffer::Create(uint32_t *indices, uint32_t count) {
-        switch (Renderer::get_API()) {
-            case Renderer_API::API::None :
+    std::shared_ptr<Index_buffer> Cecilion::Index_buffer::Create(uint32_t *indices, uint32_t count) {
+        switch (Render::Renderer::get_API()) {
+            case Render::Renderer_API::API::None :
                 CORE_ASSERT(false, "Renderer::Buffer:: No render API is defined!");
                 break;
-            case Renderer_API::API::OpenGL:
-                return new GL_index_buffer(indices, count);
+            case Render::Renderer_API::API::OpenGL:
+                return std::static_pointer_cast<Index_buffer>(std::make_shared<GL_index_buffer>(indices, count));
         }
         CORE_ASSERT(false, "Unknown Renderer_API!");
         return nullptr;
@@ -43,11 +43,11 @@ namespace Cecilion {
     std::shared_ptr<Constant_buffer>
     Constant_buffer::Create(void *vertices, uint32_t size, Raw_buffer::Access_frequency frequency,
                             Raw_buffer::Access_type type) {
-        switch (Renderer::get_API()) {
-            case Renderer_API::API::None :
+        switch (Render::Renderer::get_API()) {
+            case Render::Renderer_API::API::None :
                 CORE_ASSERT(false, "Renderer::Buffer:: No render API is defined!");
                 break;
-            case Renderer_API::API::OpenGL:
+            case Render::Renderer_API::API::OpenGL:
                 return std::static_pointer_cast<Constant_buffer>(std::make_shared<GL_constant_buffer>(vertices, size, frequency, type));
         }
         CORE_ASSERT(false, "Unknown Renderer_API!");

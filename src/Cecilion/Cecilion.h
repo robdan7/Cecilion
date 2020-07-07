@@ -9,7 +9,7 @@
 #include "Core/Input.h"
 #include "Core/Mouse_button_codes.h"
 #include "Core/Keycodes.h"
-#include "Core/Assets/Instanced_mesh.h"
+#include "Assets/Instanced_mesh.h"
 
 #include "Renderer/Renderer.h"
 #include "Renderer/Render_command.h"

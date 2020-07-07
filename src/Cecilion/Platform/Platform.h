@@ -15,9 +15,9 @@ namespace Cecilion {
         #endif
     }
 
-    Renderer_API::API get_API(){
+    Render::Renderer_API::API get_API(){
         #ifdef API_OPENGL   // Must be defined by the user.
-            return Cecilion::Renderer_API::API::OpenGL;
+            return Cecilion::Render::Renderer_API::API::OpenGL;
         #else
             CORE_ASSERT(false, "Could not find a valid API context!")
             return Cecilion::Renderer_API::API::None;

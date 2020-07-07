@@ -6,16 +6,20 @@
 
 #define API_OPENGL
 #include <Cecilion.h>
+#include "Assets/FBX_mesh.h"
 
 
 std::shared_ptr<Cecilion::Shader> create_shader() {
     auto vert = Cecilion::Shader::create_shader_stage(OPENGL_VERTEX_SHADER, R"(
             #version 450 core
-            in vec4 in_position;
+            in vec3 in_position;
+            in vec3 normal;
             in mat4 matrix;
             in vec4 instance_color;
 
+
             out vec4 vertex_color;
+            out vec3 vertex_normal;
 //            uniform Another_Uniform_block {
 //                float scale;
 //                vec4 color;
@@ -33,22 +37,26 @@ std::shared_ptr<Cecilion::Shader> create_shader() {
 
 
             void main() {
-                vec4 position = my_block.projection_matrix * my_block.view_matrix*matrix*in_position;
-                vertex_color = instance_color;
+                vec4 position = my_block.projection_matrix * my_block.view_matrix*matrix*vec4(in_position,1);
+                vertex_color = vec4(0.6,0.4,0.05,1);
 
 //                position.x += my_block.scale;
 //                position.x += my_block.testz.z;
                 gl_Position =position;
+                vertex_normal = normal;
             }
             )");
 
     auto frag = Cecilion::Shader::create_shader_stage(OPENGL_FRAGMENT_SHADER, R"(
             #version 450 core
             in vec4 vertex_color;
+            in vec3 vertex_normal;
             out vec4 color;
 
             void main() {
-                color = vertex_color;
+                color = vec4(vertex_normal*0.5+0.5,1);
+                color = vertex_color*max(dot(vertex_normal,vec3(0,1,0)),0.2);
+//                color = vertex_color;
             }
             )");
 
@@ -71,31 +79,36 @@ std::shared_ptr<Cecilion::Shader> create_shader(const char* name) {
     return Cecilion::Shader::load_binary_shader(36385, buffer.data(), buffer.size());
 }
 
-std::shared_ptr<Cecilion::Vertex_buffer> create_buffer() {
-    float vertices[4 * (4)] = {
-            -0.12f, -0.12f, 0.0f,1, //0, 0.3, 1, 1.0,
-            0.12f, -0.12f, 0.0f,1,  //0.9, 1, 0.2, 1.0,
-            0.12f, 0.12f, 0.0f,1,   //0.9, 0.3, 0.2, 1.0,
-            -0.12f, 0.12f, 0.0f,1//,  0.9, 0.3, 0.2, 1.0
-    };
+std::shared_ptr<Cecilion::Vertex_buffer> create_buffer(FBX_mesh& mesh) {
+//    float vertices[4 * (3)] = {
+//            -0.12f, -0.12f, 0.0f,//1, //0, 0.3, 1, 1.0,
+//            0.12f, -0.12f, 0.0f,//1,  //0.9, 1, 0.2, 1.0,
+//            0.12f, 0.12f, 0.0f,//1,   //0.9, 0.3, 0.2, 1.0,
+//            -0.12f, 0.12f, 0.0f//,1,  0.9, 0.3, 0.2, 1.0
+//    };
+
     std::shared_ptr<Cecilion::Vertex_buffer> vertex_buffer =
             Cecilion::Vertex_buffer::Create(
-                    vertices,
-                    sizeof(vertices),
+                    mesh.vertices.data(),
+                    sizeof(float)*mesh.vertices.size(),
                     Cecilion::Vertex_buffer::Access_frequency::STATIC,
                     Cecilion::Vertex_buffer::Access_type::DRAW);
 
     Cecilion::Buffer_layout layout = {
-            {Cecilion::Shader_data::Float4, "position"}
+            {Cecilion::Shader_data::Float3, "position"}
 //            {Cecilion::Shader_data::Float4, "color"}
     };
     vertex_buffer->set_layout(layout);
     return vertex_buffer;
 }
 
-std::shared_ptr<Cecilion::Index_buffer> create_index_buffer() {
-    uint32_t indices[6] = {0,2,3,0,1,2};
-    std::shared_ptr<Cecilion::Index_buffer> index_buffer = std::shared_ptr<Cecilion::Index_buffer>(Cecilion::Index_buffer::Create(indices, 6));
+std::shared_ptr<Cecilion::Index_buffer> create_index_buffer(std::vector<int> buf) {
+//    for (auto value : buf) {
+//        LOG_INFO(value);
+//    }
+    uint32_t indices[6] = {0,1,3,0,3,2};
+    std::shared_ptr<Cecilion::Index_buffer> index_buffer = std::shared_ptr<Cecilion::Index_buffer>(Cecilion::Index_buffer::Create(
+            reinterpret_cast<uint32_t *>(buf.data()), buf.size()));
     return index_buffer;
 }
 
@@ -116,44 +129,53 @@ Cecilion::Perspective_camera camera(0.001f, 100.0f, 45,1);
 class Mesh_layer : public Cecilion::Layer<> {
 public:
     ~Mesh_layer() override {
-        CECILION_PROFILE_END_SESSION;
+//        CECILION_PROFILE_END_SESSION;
+
     }
 
     Mesh_layer(): filter(Cecilion::ECS::get_filter<>()){
+        Cecilion::Render::Render_command::enable_depth_test();  /// TODO should no be here.
         CECILION_PROFILE_BEGIN_SESSION("frustum culling", "frustum culling.json");
 
+//        this->m_mesh = std::shared_ptr<Cecilion::Instanced_mesh>(new Cecilion::Instanced_mesh({
+//                                                                                                      {Cecilion::Shader_data::Mat4, "matrix"},
+//                                                                                                      {Cecilion::Shader_data::Float4, "color"}}));
+//        this->m_mesh->add_LOD(create_buffer(), create_index_buffer(), create_shader());
+
+//        FBX_meshes mesh = FBX_meshes("square.fbx");
         this->m_mesh = std::shared_ptr<Cecilion::Instanced_mesh>(new Cecilion::Instanced_mesh({
-            {Cecilion::Shader_data::Mat4, "matrix"},
-            {Cecilion::Shader_data::Float4, "color"}}));
-        this->m_mesh->add_LOD(create_buffer(), create_index_buffer(), create_shader());
+                                                                                                      {Cecilion::Shader_data::Mat4, "matrix"},
+                                                                                                      {Cecilion::Shader_data::Float4, "color"}}));
+//        this->m_mesh->add_LOD(create_buffer(mesh), create_index_buffer(mesh.materials[0].indices), create_shader());
+        this->m_mesh->add_LOD("Pancake.fbx", create_shader());
 
         int i = 0;
-        float size = 5;
-        for (float x = -size; x < size; x += 0.3f) {
-            for (float y = -size; y < size; y += 0.3f) {
+        float size = 0.3f;
+        for (float x = -size; x < size; x += 3.0f) {
+            for (float y = -size; y < size; y += 3.0f) {
 
                 float matrices[16+4] = {
                         1, 0, 0, 0,
                         0, 1, 0, 0,
                         0, 0, 1, 0,
                         x, y, 0,1,
-                        0.0f,x/5.0f,y/5.0f,1
+                        0.2f,x/5.0f,y/5.0f,1
                 };
-                this->m_mesh->add_instance(matrices, glm::vec3{x, y, 0}, sqrt(2)*0.12f);
+                this->m_mesh->add_instance(matrices, glm::vec3{x, y, 0}, sqrt(2)*2.0f);
                 i++;
             }
         }
-        CORE_LOG_INFO("Computed {0} instances", i);
+//        CORE_LOG_INFO("Computed {0} instances", i);
     }
     void on_update() override {
 
         Cecilion::Layer<>::on_update();
         this->m_mesh->on_update();
-        Cecilion::Render_command::set_clear_color({0.2f,0.2f,0.2f,1.0f});
-        Cecilion::Render_command::clear();
-        Cecilion::Renderer::begin_scene(camera);
+        Cecilion::Render::Render_command::set_clear_color({0.2f,0.2f,0.2f,1.0f});
+        Cecilion::Render::Render_command::clear();
+        Cecilion::Render::Renderer::begin_scene(camera);
         this->m_mesh->on_render();
-        Cecilion::Renderer::end_scene();
+        Cecilion::Render::Renderer::end_scene();
     }
 
 private:
@@ -167,12 +189,14 @@ public:
         this->check_inbox();
     }
     Input_layer() {
-        camera.set_position_axis_aligned(glm::vec3(0, 0, 10.0f));
+        camera.set_aspect_ratio((float)Cecilion::Application::get().get_window().get_width()/Cecilion::Application::get().get_window().get_height());
+        camera.set_position_axis_aligned(glm::vec3(0, 0, 4.0f));
         camera.look_at(glm::vec3(-1,0,0));
         camera.on_update();
 
         this->set_callback<Cecilion::Mouse_cursor_Event>([this](auto event){
-            camera.set_rotation(event.xpos/1000,(event.ypos)/1000,0);
+//            camera.set_rotation(event.xpos/1000,(event.ypos)/1000,0);
+            camera.set_position_axis_aligned(glm::vec3(event.xpos/100,(event.ypos)/100,2));
             camera.on_update();
         });
         this->set_callback<Cecilion::Keyboard_key_Event>([this](auto event){
@@ -190,7 +214,7 @@ public:
             }
         });
         this->set_callback<Cecilion::Window_resize_event>([](Cecilion::Window_resize_event event){
-            camera.set_aspect_ratio(event.width / event.height);
+            camera.set_aspect_ratio((float)event.width/event.height);
         });
     }
 private:

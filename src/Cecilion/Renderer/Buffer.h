@@ -61,8 +61,8 @@ namespace Cecilion {
     }
 
     static char* get_shader_data_string(const Shader_data &type) {
-        switch(Renderer_API::get_API()) {
-            case Renderer_API::API::OpenGL:
+        switch(Render::Renderer_API::get_API()) {
+            case Render::Renderer_API::API::OpenGL:
                 switch (type) {
                     case Shader_data::Float:    return "float";
                     case Shader_data::Float2:   return "vec2";
@@ -77,7 +77,7 @@ namespace Cecilion {
                     case Shader_data::Bool:     return "bool";
                 }
                 break;
-            case Renderer_API::API::None:
+            case Render::Renderer_API::API::None:
                 CORE_ASSERT(false, "Renderer::Buffer:: Could not find a render API!");
                 break;
         }
@@ -261,7 +261,7 @@ namespace Cecilion {
          * @param count - The size of all indices in bytes.
          * @return - A raw pointer to the newly created vertex buffer.
          */
-        static Index_buffer* Create(uint32_t* indices, uint32_t count);
+        static std::shared_ptr<Index_buffer> Create(uint32_t* indices, uint32_t count);
         virtual ~Index_buffer() {}
         virtual void bind() = 0;
         virtual void unbind() = 0;

@@ -14,8 +14,8 @@ namespace Cecilion {
 //        inline static void draw_indexed(const std::shared_ptr<Vertex_array>& vertex_array) {
 //            s_render_API->draw_indexed(vertex_array);
 //        }
-//        inline static void draw_instanced(const std::shared_ptr<Vertex_array>& vertex_array, int instances) {
-//            s_render_API->draw_instanced(vertex_array, instances);
+//        inline static void draw_indexed(const std::shared_ptr<Vertex_array>& vertex_array, int instances) {
+//            s_render_API->draw_indexed(vertex_array, instances);
 //        }
 //    private:
 //        static Renderer_API* s_render_API;

@@ -20,7 +20,7 @@
 #include "Renderer/Renderer_API.h"
 namespace Cecilion {
     GLFW_context* create_engine_context();
-    Cecilion::Renderer_API::API get_API();
+    Cecilion::Render::Renderer_API::API get_API();
 }
 
 

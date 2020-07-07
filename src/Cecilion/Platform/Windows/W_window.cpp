@@ -125,7 +125,7 @@ namespace Cecilion {
     }
 
     void W_window::activate_resize() {
-        glViewport(0,0, this->m_data->width, this->m_data->height);
+        glViewport(0,0, this->m_data->width, this->m_data->height); /// TODO This should be a generic resize.
     }
 
     void W_window::show_cursor() {
