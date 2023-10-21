@@ -1,43 +1,56 @@
 #include "ECS.h"
+#include "Config.h"
+
 #include <Core/Log.h>
 #include <iostream>
 namespace Cecilion {
-    std::vector<std::shared_ptr<Sparse_set<Entity>>> ECS::containers = std::vector<std::shared_ptr<Sparse_set<Entity>>>();
-    std::unordered_map<std::type_index, int> ECS::container_mappings = std::unordered_map<std::type_index, int>();
-    std::vector<Entity> ECS::entities = std::vector<Entity>();
-    Entity ECS::last_deleted = ECS::NULL_ENTITY;
-
-    /**
-     * Create an entity. There can at most exist 65515 entities at the same time. Allocating
-     * more entities will lead to undefined behaviour.
-     * @return
-     */
-    Entity ECS::create_entity() {
-        CORE_ASSERT(entities.size() == ECS::MAX_VALUE, "The maximum number of ECS entities has been reached! Total: [0}", ECS::MAX_VALUE);
-
-        if (last_deleted != ECS::NULL_ENTITY) {
-            /// We need to reuse an old entity ID.
-            Entity ID = last_deleted;
-            last_deleted = entities[last_deleted];
-            entities[ID] = ID;
-            return ID;
+    ECS::~ECS() {
+        for (auto it = m_component_storage.begin(); it != m_component_storage.end(); ++it) {
+            delete it->second;
         }
-        return entities.emplace_back(entities.size());
     }
 
-    void ECS::delete_entity(Entity entity) {
-        CORE_ASSERT(entity!=ECS::NULL_ENTITY, "Cannot delete null pointer entity!");
-        if (entity == NULL_ENTITY) {
-            throw "ECS entity is equal to null pointer!";
+    void ECS::delete_entity(const ECS::Entity_ID& ID) {
+        if (!this->m_entities.has_entry(ID)) {
+            // TODO Error
+            return;
         }
 
-        for (std::shared_ptr<Sparse_set<Entity>> container : containers) {
-            if (container->has_ID(entity)) {
-                container->remove(entity);
+        if (this->m_entities[ID].m_refs > 0) {
+            // TODO Error
+        }
+
+        this->m_entities.free(ID);
+    }
+
+
+
+//	void ECS::set_as_active_context() {
+//		this = (ECS*)this;
+//	}
+
+    void ECS::clear_storage() {
+        /*
+        for (auto& ID : this->m_delete_list) {
+            if (std::find(this->m_freelist.begin(), this->m_freelist.end(), ID) != this->m_freelist.end()) {
+                // ORVOX_ERROR("Tried to delete an entity that does not exist"); TODO Error
             }
+            for (auto it = this->m_component_storage.begin(); it != this->m_component_storage.end(); ++it) {
+                it->second->try_delete(ID);
+            }
+            this->m_freelist.push_back(ID);
         }
-        entities.at(entity) = last_deleted;
-        last_deleted = entity;
+        this->m_delete_list.clear();*/
     }
 
+
+    Entity_ref ECS::create_entity() {
+
+        // This may throw error.
+        auto id = this->m_entities.alloc();
+
+        this->m_entities.at(id).m_entity_ID = id;
+
+        return Entity_ref(this, &this->m_entities[id]);
+    }
 }

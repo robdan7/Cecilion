@@ -1,182 +1,206 @@
+/**
+ * @author Robyn
+ */
 #pragma once
-
-#include <cstdint>
-#include <vector>
-#include <mutex>
-#include <typeindex>
 #include <unordered_map>
-#include <Utils/Sparse_set.h>
-#include <functional>
-#include "System_events.h"
-#include <Core/Log.h>
-
+#include <typeindex>
+#include <limits>
+#include <utility>
+#include "Utils/allocator/Sparse_table.h"
+#include "Event_inbox.h"
 namespace Cecilion {
-    using Event_ID_length = uint16_t;
+	/**
+	 * This is what we will use to send in-game and system events in the engine. No special sauce is needed to
+	 * post an event, and you can even create new types of events on the fly. Just submit any struct or class!
+	 */
+	class Event_system {
+		friend I_Event_actor;
+	public:
 
-    class I_Event_actor;
+		Event_system() = default;
+		~Event_system() {
 
-    class I_Event_list {
-
-    };
-
-    template<typename Event_type>
-    class Event_list : public I_Event_list{
-    public:
-//        bool has_event(Event_ID_length event_ID) {
-//            if (this->sparse_set.has_ID(event_ID)) {
-//                int index = this->sparse_set.index(event_ID);
-//                if (index < this->events.size()) {
-//                    return true;
-//                }
-//                return false;
-//            } else {
-//                return false;
-//            }
-////            return this->sparse_set.has_ID(event_ID) && this->sparse_set.index(event_ID) < this->events.size();
-//        }
-
-        /**
-         * Return a copy of an event. Not a reference.
-         * @param event_ID
-         */
-        Event_type fetch_event(Event_ID_length event_ID) {
-            this->event_m.lock();
-            const auto index = this->sparse_set.index(event_ID);
-            auto event = this->events.at(index).event;
-
-            if (!(--this->events.at(index).ref_counter)) {
-                this->events.at(index) = this->events.back();
-                this->events.pop_back();
-                this->sparse_set.remove(event_ID);
-                this->deleted.push_back(event_ID);
+            if (s_active_context == this) {
+				s_active_context = nullptr;
+			}
+            for (auto& c : this->m_event_containers) {
+                delete c.second;
             }
-            this->event_m.unlock();
-            return event;
-        }
+		}
 
-        template<typename... Args>
-        void send_event(Args&&... args) {
-            this->event_m.lock();
-            Event_ID_length event_ID;
-            if (deleted.size()) {
-                event_ID = this->deleted.back();
-                this->deleted.pop_back();
-            } else {
-                event_ID = this->events.size();
-            }
-            this->sparse_set.put(event_ID);
+		using Event_ID = uint16_t;
 
-            this->actor_m.lock();
-            this->events.push_back(Event_container{this->function_callbacks.size(), Event_type(args...)});
-            this->event_m.unlock();
-            for (auto callback : this->function_callbacks) {
-                callback(event_ID);
-            }
-            this->actor_m.unlock();
-        }
+		template<typename Event, typename... Args>
+		static bool post(Args&&... args) {
+			// ORVOX_ASSERT(s_active_context, "Could not find an active event system context!");
+			if (s_active_context && s_active_context->m_event_containers.count(typeid(Event)) > 0) {
+				try {
+					static_cast<Event_dispatcher<Event>*>(s_active_context->m_event_containers.at(typeid(Event)))->template post<Args...>(std::forward<Args>(args)...);
+				}
+				catch (std::exception e) {
+					// ORVOX_ERROR("Could not post event of type {0}", typeid(Event).name());
+					return false;
+				}
+				return true;
+			}
+			else {
+				// ORVOX_TRACE("Found no active subscribers for event type {0}", typeid(Event).name());
+				return false;
+			}
+		}
 
-        template<typename Callback>
-        void subscribe(Callback callback) {
-            this->actor_m.lock();
-            this->function_callbacks.push_back(callback);
-            this->actor_m.unlock();
-        }
+	private:
+		class I_Event_dispatcher {
+                public:
+                    virtual ~I_Event_dispatcher() {}
+		};
 
-        /**
-         * Let an actor unsubscribe from an event. Deleting an actor without unsubscribing
-         * leads to undefined behaviour.
-         * @param actor
-         */
-         // TODO Implement this the proper way, ya dingus fungus.
-//        void unsubscribe(I_Event_actor* actor) {
-//            this->actor_m.lock();
-//            auto iterator = std::find(this->actors.begin(), this->actors.end(), actor);
-//            if (iterator != this->actors.end()) {
-//                *iterator = this->actors.back();
-//                this->actors.pop_back();
-//            }
-//            this->actor_m.unlock();
-//        }
+		template<typename Event_type>
+		class Event_dispatcher : public I_Event_dispatcher {
+		public:
+			Event_dispatcher() = default;
+			void subscribe(Event_inbox<Event_ID, Event_type>* inbox) {
+				this->m_event_actors.push_back(inbox);
+			}
 
-    private:
-        struct Event_container {
-            uint32_t ref_counter;
-            Event_type event;
-        };
-    private:
+            ~Event_dispatcher() override {}
 
-        std::mutex event_m, actor_m;
-        std::vector<Event_container> events;
-        Sparse_set<uint32_t> sparse_set;
-        std::vector<uint16_t> deleted;
-        // TODO Change this to a struct with Actor ID and callback
-        std::vector<std::function<void(uint16_t)>> function_callbacks;
-    };
+            /**
+             * Post an event to all currently active subscribers.
+             * @tparam Args
+             * @param args
+             */
+			template<typename... Args>
+			bool post(Args&&... args) {
+				this->m_mutex.lock();
 
-    class Event_system {
-    public:
-        template<typename Event>
-        static bool has_event(Event_ID_length event_ID) {
-            return static_cast<Event_list <Event>*>(event_containers.at(typeid(Event)))->has_event(event_ID);
-        }
+				Event_ID event_ID = this->m_event_allocator.alloc(std::piecewise_construct,
+					std::forward_as_tuple(this->m_event_actors.size()),
+					std::forward_as_tuple(args...));
 
-        template<typename Event>
-        static Event fetch_event(Event_ID_length event_ID) {
-            return static_cast<Event_list <Event>*>(event_containers.at(typeid(Event)))->fetch_event(event_ID);
-        }
+				this->m_mutex.unlock();
+				/// All subscribers need to be notified. Actors that subscribe after an event has been posted
+				/// will not be notified.
+				for (Event_inbox<Event_ID, Event_type>* inbox : this->m_event_actors) {
+					inbox->notify(event_ID);
+				}
+				return true;
+			}
 
+			/**
+			 * Call this when an actor wants to execute a script on a given event.
+			 * The event will be dropped when all actors that were subscribed at the time have executed it.
+			 * @param ID
+			 * @param f
+			 */
+			void execute_event(const Event_ID& ID, const std::function<void(const Event_type&)>& f) {
+				/// TODO Minimize the mutex locks.
+				this->m_mutex.lock();
+				auto& event = this->m_event_allocator[(std::size_t)ID];
 
-        template<typename Event>
-        static void set_container() {
-            if (!event_containers.count(typeid(Event))) {
-                event_containers[typeid(Event)] = static_cast<I_Event_list*>(new Event_list<Event>());
-            }
-        }
+				if (event.first == 0) {
+					throw std::invalid_argument("Invalid Event ID");
+				}
+				f(event.second);    /// It should be safe to run this without mutex. The counter has not been decreased yet.
+				//std::unique_lock<std::mutex>(this->m_event_mutex);
+				event.first--;
 
-        /**
-        * Let an event actor subscribe to all of its events.
-        * @tparam Events
-        * @param actor
-        */
-//        template<typename... Events>
-//        static void subscribe_to(Event_actor<Events...> *actor) {
-//            (set_container<Events>(),...);
-//            (static_cast<Event_list<Events>*>(event_containers.at(typeid(Events)))->subscribe(static_cast<I_Event_actor*>(actor)), ...);
-//        }
-        /**
-         * Subscribe to one type of event.
-         * @tparam Event
-         * @tparam Callback - The notify function
-         * @param callback
-         */
-        template<typename Event>
-        static void subscribe_to(std::function<void(Event_ID_length)> callback) {
-            set_container<Event>();
-            static_cast<Event_list<Event>*>(event_containers.at(typeid(Event)))->subscribe(callback);
-        }
+				if (event.first == 0) {
+					this->m_event_allocator.free(std::forward<const Event_ID&>(ID));
+					this->m_deleted_IDs.push_back(ID);
+				}
+				this->m_mutex.unlock();
+			}
 
-        template<typename Event, typename... Args>
-        static void post(Args&&... args) {
-            if (event_containers.contains(typeid(Event))) {
-                static_cast<Event_list<Event>*>(event_containers.at(typeid(Event)))->template send_event<Args...>(std::forward<Args>(args)...);
-            } else {
-//                CORE_LOG_WARN("No actor is listening to event {0}", typeid(Event).name());
-            }
-        }
+			/**
+			 * Let an event actor unsubscribe from an event.
+			 * @param inbox
+			 */
+			void unsubscribe(Event_inbox<Event_ID, Event_type>* inbox) {
+				this->m_mutex.lock();
+				auto iter = std::find(this->m_event_actors.begin(), this->m_event_actors.end(), inbox);
+				if (iter != this->m_event_actors.end()) {
+					this->m_event_actors.erase(iter);
+				}
+				this->m_mutex.unlock();
+			}
 
+		private:
+			Same_arena_allocator<1, uint8_t, std::pair<size_t, Event_type>> m_event_allocator;
 
+			std::mutex m_mutex;
+			std::vector<Event_ID> m_deleted_IDs;
+			std::vector<Event_inbox<Event_ID, Event_type>*> m_event_actors;
+		};
 
-//        template<typename... Events>
-//        static void unsubscribe(Event_actor<Events...>* actor) {
-//            (static_cast<Event_list<Events>*>(event_containers.at(typeid(Events)))->unsubscribe(
-//                    static_cast<I_Event_actor*>(actor)), ...);
-//        }
-        // TODO Implement unsubscribe to one event type.
+		/**
+		 * Subscribe to an event.
+		 * @tparam Event
+		 * @param f
+		 * @return True if the subscription was successful. Returns false if the event inbox is a null ptr.
+		 */
+		template<typename Event>
+		static bool subscribe(Event_inbox<Event_ID, Event>* inbox) {
+			// ORVOX_ASSERT(s_active_context, "Could not find an active event system context!");
+			if (inbox == nullptr) {
+				throw std::invalid_argument("Invalid inbox reference");
+			}
 
-    private:
+			{
+				//std::unique_lock<std::mutex>(s_container_mutex);
+                s_active_context->s_container_mutex.lock();
+				if (s_active_context->m_event_containers.count(typeid(Event)) == 0) {
+					s_active_context->m_event_containers[typeid(Event)] = static_cast<I_Event_dispatcher*>(new Event_dispatcher<Event>());
+				}
+                s_active_context->s_container_mutex.unlock();
+			}
 
+			static_cast<Event_dispatcher<Event>*>(s_active_context->m_event_containers.at(typeid(Event)))->subscribe(inbox);
 
-    private:
-        static std::unordered_map<std::type_index, I_Event_list*> event_containers;
-    };
+			/// The subscription was successful.
+			return true;
+			//return static_cast<Event_dispatcher<Event>>(s_event_containers.at(typeid(Event)))
+		}
+
+		/**
+		 * Let an event actor unsubscribe from one or more events.
+		 * @tparam Event
+		 * @param inbox
+		 * @return
+		 */
+		template<typename... Event>
+		static void unsubscribe(Event_inbox<Event_ID, Event>*... inbox) {
+		//	ORVOX_ASSERT(s_active_context, "Could not find an active event system context!");
+			([inbox](){
+       if (s_active_context->m_event_containers.count(typeid(Event)) > 0) {
+        std::cout << "found container" << std::endl;
+         static_cast<Event_dispatcher<Event>*>(s_active_context->m_event_containers.at(typeid(Event)))->unsubscribe(inbox);
+       } else {
+        std::cout << "could not find container" << std::endl;
+       }
+       }, ...);
+		}
+
+		/**
+		 * Run the script on a given event id.
+		 * @tparam Event - The event type
+		 * @param ID - The event ID (only unique among the same type of events)
+		 * @param f - Script function.
+		 */
+		template<typename Event>
+		static void execute_event(const Event_ID& ID, const std::function<void(const Event&)>& script) {
+			// ORVOX_ASSERT(s_active_context, "Could not find an active event system context!");
+			static_cast<Event_dispatcher<Event>*>(s_active_context->m_event_containers.at(typeid(Event)))->execute_event(ID, script);
+		}
+
+  public:
+	  void set_as_active_context() {
+			s_active_context = this;
+		}
+
+	private:
+		std::unordered_map<std::type_index, I_Event_dispatcher*> m_event_containers;
+		static Event_system* s_active_context;
+		std::mutex s_container_mutex;
+	};
 }

@@ -1,22 +1,8 @@
-/**
- * @author Robyn
- */
 #pragma once
 
-#include <string>
-
-namespace Cecilion::Events {
-
-	template<class C>
-	struct Component_event {
-		bool spawn_flag;
-		Component_event(bool spawn) : spawn_flag(spawn) {}
-	};
-
-    struct Exception_event  {
-        std::string payload;
-        Exception_event(const char* payload) : payload(payload) {}
-    };
+#include <typeindex>
+namespace Cecilion {
+    /// There are some basic event types supported by the engine.
 
     struct Mouse_button_Event {
         int button, action;
