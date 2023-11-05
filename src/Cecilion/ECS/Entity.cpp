@@ -6,7 +6,7 @@ namespace Cecilion {
 
 
     Entity_ref::~Entity_ref()  {
-        if (this->p_source != nullptr) {
+        if (this->p_source != nullptr && this->p_source->operator!=(nullptr)) {
             this->p_source->m_refs --;
             if(this->p_source->m_refs == 0) {
                 // Delete entity
@@ -49,33 +49,37 @@ namespace Cecilion {
         }
     }
 
+    Entity_source &Entity_ref::operator->() {
+        return *this->p_source;
+    }
 
+    const Entity_ref::Entity_ID& Entity_ref::id() const {
+        return this->p_source->m_entity_ID;
+    }
 
-    Entity_ref Entity_ref::Instantiate() {
-        if (this->operator==(nullptr)) {
-            // TODO Error
+    bool Entity_ref::operator==(nullptr_t const &_) const {
+        return this->p_source == nullptr || this->p_source->operator==(nullptr);
+    }
+
+    bool Entity_ref::operator!=(nullptr_t const &_) const {
+        return  this->p_source != nullptr && this->p_source->operator!=(nullptr);
+    }
+
+    bool Entity_ref::operator==(const Entity_ref &rhs) const {
+        if (this->p_source != nullptr && rhs.p_source != nullptr) {
+            return this->p_source->operator==(*rhs.p_source);
         }
-        return this->p_ecs->create_entity();
+        // The expression is never false if one or both entity sources are null.
+        return false;
     }
 
-    void Entity_ref::delete_compoent(std::type_index type) {
-        this->p_ecs->pop_component(*this,type);
+    void Entity_ref::Destroy() {
+        this->p_ecs->delete_entity(this->id());
     }
 
-    I_Component& Entity_ref::get_component(std::type_index type) {
-        return this->p_ecs->get_component(*this,type);
+    I_Component_ref Entity_ref::add_component(const YAML::Node &node) {
+        return this->p_ecs->add_component(node,*this);
     }
 
-    ECS *Entity_ref::get_ecs() {
-        return this->p_ecs;
-    }
-
-    template<typename C>
-    C &Entity_ref::get_component() {
-        if (!this->p_ecs->has_component<C>(this->id())) {
-            // TODO Error
-        }
-        return this->p_ecs->get_component<C>(this->p_source->m_entity_ID);
-    }
 
 }

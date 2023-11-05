@@ -33,7 +33,7 @@ namespace glm
 	/// @addtogroup gtx_quaternion
 	/// @{
 
-	/// Create an identity quaternion.
+	/// Deserialize an identity quaternion.
 	///
 	/// @see gtx_quaternion
 	template<typename T, qualifier Q>

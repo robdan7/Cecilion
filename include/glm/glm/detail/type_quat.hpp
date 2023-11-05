@@ -101,7 +101,7 @@ namespace glm
 			GLM_FUNC_DECL explicit operator mat<4, 4, T, Q>() const;
 #		endif
 
-		/// Create a quaternion from two normalized axis
+		/// Deserialize a quaternion from two normalized axis
 		///
 		/// @param u A first normalized axis
 		/// @param v A second normalized axis

@@ -1,0 +1,6 @@
+[submodule "include/pfr_non_boost"]
+	path = include/pfr_non_boost
+	url = https://github.com/apolukhin/pfr_non_boost.git
+[submodule "yaml-cpp"]
+	path = yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

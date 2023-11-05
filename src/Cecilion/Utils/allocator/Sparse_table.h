@@ -1,20 +1,8 @@
 #pragma once
 #include "Allocator.h"
+#include "I_Sparse_table.h"
 
 namespace Cecilion {
-    class I_sparse_table {
-    public:
-        virtual bool has_ID(const std::size_t& ID) = 0;
-        virtual void delete_entry(const std::size_t& ID) = 0;
-        virtual bool has_table(const std::size_t& table_index) = 0;
-        virtual bool try_delete(const std::size_t& ID) = 0;
-        [[nodiscard]] virtual std::size_t packed_size() const = 0;
-        [[nodiscard]] virtual std::size_t n_sparse_pages() const = 0;
-        //[[nodiscard]] virtual I_sparse_table* make_copy() const = 0;
-        virtual ~I_sparse_table() = default;
-    protected:
-        I_sparse_table() = default;
-    };
 
     /**
      * Standard sparse table. Nothing fancy going on here.
@@ -69,7 +57,7 @@ namespace Cecilion {
         T& emplace_entry(const std::size_t& ID, Args... args) {
             auto packed_index = this->m_packed_set.emplace(std::forward<Args>(args)...);
             this->m_index_set.emplace(ID, packed_index);
-            this->m_packed_index.push(ID);
+            this->m_packed_index.emplace(ID);
             return this->m_packed_set[packed_index];
         }
 

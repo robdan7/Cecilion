@@ -24,7 +24,7 @@ namespace spdlog {
 
 using default_factory = synchronous_factory;
 
-// Create and register a logger with a templated sink type
+// Deserialize and register a logger with a templated sink type
 // The logger's level, formatter and flush level will be set according the
 // global settings.
 //

@@ -1,44 +1,26 @@
 #pragma once
+#include <ECS/ECS.h>
 #include <ECS/Config.h>
 #include <ECS/Entity.h>
 #include <ECS/Component.h>
+#include <yaml-cpp/yaml.h>
+#include <vector>
 namespace Cecilion {
-    class GameNode: I_Component {
+    class GameNode: public I_Component {
     public:
         GameNode(const GameNode&) = delete;
         GameNode& operator=(const GameNode&) = delete;
         GameNode() = delete;
 
-
-        bool operator==(const GameNode &rhs) const;
-        bool operator!=(const GameNode &rhs) const;
-        bool operator==(std::nullptr_t _);
-        bool operator!=(std::nullptr_t _);
-
-        GameNode& Instantiate() {
-
+        [[deprecated]]
+        I_Component_ref parse_component(const YAML::Node& node) {
+            return this->m_entity.add_component(node);
         }
-
-        /**
-         * Add a script to this game node.
-         * @tparam Component
-         * @return
-         */
-        /*
-       template<typename Component, typename std::enable_if<std::is_base_of<BehaviourScript, Component>::value>>
-       Component& add_component();
-       */
     protected:
-
-        explicit GameNode(const Cecilion::Entity_ref& entity, const GameNode* parent);
-
-        const Cecilion::Entity_ref& entity() {
-            return this->m_entity;
-
-        }
-
+        explicit GameNode(const Cecilion::Entity_ref& entity, const Component_ref<GameNode>& parent);
+        explicit GameNode(const Cecilion::Entity_ref& entity);
     public:
-        void setParent(GameNode *mParent);
+        void setParent(Component_ref<GameNode>& new_parent);
 
     private:
         virtual void start(){}
@@ -47,8 +29,8 @@ namespace Cecilion {
         virtual void update(){}
         virtual void destroy(){}
 
-        void addChild(GameNode& node);
-
-        const GameNode* p_parent = nullptr;
+    private:
+        Component_ref<GameNode> m_parent;
+        std::vector<Component_ref<GameNode>> m_children;
     };
 }

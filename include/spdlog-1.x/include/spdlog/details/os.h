@@ -94,7 +94,7 @@ void wstr_to_utf8buf(wstring_view_t wstr, memory_buf_t &target);
 // "abc///" => "abc//"
 SPDLOG_API filename_t dir_name(filename_t path);
 
-// Create a dir from the given path.
+// Deserialize a dir from the given path.
 // Return true if succeeded or if this dir already exists.
 SPDLOG_API bool create_dir(filename_t path);
 

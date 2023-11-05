@@ -364,18 +364,21 @@ namespace Cecilion {
     class Pool_array : public I_page_storage<page_t> {
     public:
         ~Pool_array() {
-            for (Container*& container : this->m_pages) {
+            if (this->m_n_of_pages == 0) return;
+            this->m_n_of_pages = 0;
+            for (std::size_t i = 0; i < (uint32_t)1 << (8 * page_t); ++i) {
+                auto container = this->m_pages[i];
+                this->m_pages[i] = nullptr;
                 if (container != nullptr) {
-                    for (std::size_t i = 0; i < (uint32_t)1 << (8 * page_t); ++i) {
-                        Container& c = container[i];
-                        if (*((bool*)&container[i])) {
+                    for (std::size_t k = 0; k < (uint32_t)1 << (8 * page_t); ++k) {
+                        Container& c = container[k];
+                        if (*((bool*)&container[k])) {
                             //std::cout << "s" << std::endl;
-                            container[i].~Container();
+                            container[k].~Container();
                         }
                     }
+                    std::free(container);
                 }
-                //delete[] container;
-                std::free(container);
             }
         }
 
@@ -494,7 +497,7 @@ namespace Cecilion {
          * @return
          */
         bool has_page_indexed(const std::size_t index) const {
-            return this->m_pages[this->page(index)] != nullptr;
+            return this->m_n_of_pages > 0 && this->m_pages[this->page(index)] != nullptr;
         }
 
         bool not_null(std::size_t index, const T& null_value) const {

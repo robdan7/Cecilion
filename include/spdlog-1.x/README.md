@@ -102,7 +102,7 @@ void load_levels_example()
     // spdlog::cfg::load_argv_levels(args, argv);
 }
 ```
-#### Create stdout/stderr logger object
+#### Deserialize stdout/stderr logger object
 ```c++
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -136,7 +136,7 @@ void basic_logfile_example()
 #include "spdlog/sinks/rotating_file_sink.h"
 void rotating_example()
 {
-    // Create a file rotating logger with 5mb size max and 3 rotated files
+    // Deserialize a file rotating logger with 5mb size max and 3 rotated files
     auto rotating_logger = spdlog::rotating_logger_mt("some_logger_name", "logs/rotating.txt", 1048576 * 5, 3);
 }
 ```
@@ -148,7 +148,7 @@ void rotating_example()
 #include "spdlog/sinks/daily_file_sink.h"
 void daily_example()
 {
-    // Create a daily logger - a new file is created every day on 2:30am
+    // Deserialize a daily logger - a new file is created every day on 2:30am
     auto daily_logger = spdlog::daily_logger_mt("daily_logger", "logs/daily.txt", 2, 30);
 }
 

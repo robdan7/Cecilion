@@ -147,7 +147,7 @@ Current Version: 6.1.0
 * Generic objects with dynamic properties support
 * Add ability to call functions contained in properties
 * Add lambda captures
-* Create [cheatsheet.md](cheatsheet.md) for all-in-one reference of features
+* Deserialize [cheatsheet.md](cheatsheet.md) for all-in-one reference of features
 * Fix support for libc++
 * Eliminate clone of return value stored locally
 * Eliminate 'return' statements when last line of function

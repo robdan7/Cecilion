@@ -85,7 +85,9 @@ namespace Cecilion {
         void add_subscription() {
             /// Check if the subscription does not exist yet, then add a callback subscription to the event.
             if (std::find(this->subscriptions.begin(), this->subscriptions.end(), typeid(Event)) == this->subscriptions.end()) {
-                Event_system::subscribe_to<Event>([this](auto ID){
+                // TODO add subscription
+                /*
+                Event_system::subs<Event>([this](auto ID){
                     auto iterator = this->m_groups.rbegin();
                     while(iterator != this->m_groups.rend()) {
                         if ((*iterator)->template try_forward<Event>(ID)) {
@@ -93,7 +95,7 @@ namespace Cecilion {
                         }
                         iterator ++;
                     }
-                });
+                });*/
             }
         }
 

@@ -1,27 +1,22 @@
 #pragma once
-#include <ECS/ECS.h>
 #include "GameNode.h"
 #include <iostream>
 
 
 namespace Cecilion {
+    class ECS;
     class I_Scene {
-    protected:
-        I_Scene() = default;
-        Cecilion::ECS m_ecs;
+    public:
+        I_Scene();
+        std::shared_ptr<Cecilion::ECS> p_ecs;
     };
 
-    class Scene: I_Scene, Cecilion::GameNode {
+    class Scene: protected I_Scene, public Cecilion::GameNode {
     public:
-        explicit Scene() : GameNode(this->m_ecs.create_entity(), nullptr) {
-            std::cout << "Scene start" << std::endl;
-        }
-        
+        explicit Scene();
 
     private:
-        void start() override {
-            std::cout << "Scene started!!" << std::endl;
-        }
+        void start() override;
 
 
     };

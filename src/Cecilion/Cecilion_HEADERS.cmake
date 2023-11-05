@@ -4,3 +4,4 @@
 #set(Cecilion_HEADERS ${PROJECT_SOURCE_DIR}/src/Cecilion)
 #set(Platform_HEADERS ${PROJECT_SOURCE_DIR}/src/Cecilion/Platform)
 set(CECILION_HEADER  ${PROJECT_SOURCE_DIR}/src/Cecilion)
+set(INCLUDE_HEADER ${PROJECT_SOURCCE_DIR}/include/pfr/include)

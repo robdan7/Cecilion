@@ -41,7 +41,7 @@ namespace glm
 	/// @addtogroup gtx_string_cast
 	/// @{
 
-	/// Create a string from a GLM vector or matrix typed variable.
+	/// Deserialize a string from a GLM vector or matrix typed variable.
 	/// @see gtx_string_cast extension.
 	template<typename genType>
 	GLM_FUNC_DECL std::string to_string(genType const& x);
