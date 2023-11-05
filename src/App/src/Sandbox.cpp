@@ -2,7 +2,6 @@
 #include <string>
 #include <Utils/Type.h>
 #include <pfr.hpp>
-#define NAME_OF( v ) #v
 
 struct Test_component : Cecilion::I_Component, Cecilion::Serializable {
 public:
@@ -39,8 +38,6 @@ class App : public Cecilion::Application {
 public :
     App() {
 
-        YAML::Node testNode = YAML::Load("{my_number: 3}");
-
         {
             Cecilion::Scene scene;
             try {
@@ -50,6 +47,8 @@ public :
                 std::cout << "Could not create component from yaml" << std::endl;
             }
 
+            // All gameNodes have a transform
+            std::cout << "Scene has transform component? " << ((scene.transform() != nullptr) ? "Yes" :"No") << std::endl;
 
             if (scene.has_component<Test_component>()) {
                 auto ref = scene.get_component<Test_component>();
@@ -76,21 +75,4 @@ public :
 
 Cecilion::Application *Cecilion::CreateApplication() {
     return new App();
-}
-
-
-bool Transform::operator==(const Transform &other) const {
-    return false;
-}
-
-bool Transform::operator!=(const Transform &other) const {
-    return false;
-}
-
-bool Transform::operator==(std::nullptr_t _) {
-    return false;
-}
-
-bool Transform::operator!=(std::nullptr_t _) {
-    return false;
 }

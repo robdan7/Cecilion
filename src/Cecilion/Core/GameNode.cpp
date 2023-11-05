@@ -5,7 +5,7 @@
 namespace Cecilion {
     auto test = std::source_location::current();
 
-    GameNode::GameNode(const Cecilion::Entity_ref &entity, const Component_ref<GameNode>& parent): I_Component(std::forward<const Entity_ref>(entity)), m_parent(parent) {
+    GameNode::GameNode(const Cecilion::Entity_ref &entity, const Component_ref<GameNode>& parent): I_Dependency_component<Cecilion::Transform>(std::forward<const Entity_ref>(entity)), m_parent(parent), m_transform(this->get_component<Transform>()) {
         if (this->m_entity == nullptr) {
             // TODO Better error
             throw std::runtime_error("Could not initiate game node");
@@ -37,8 +37,12 @@ namespace Cecilion {
         new_parent.operator->().m_children.push_back(self_ref);
     }
 
-    GameNode::GameNode(const Entity_ref &entity) : I_Component(entity), m_parent() {
+    GameNode::GameNode(const Entity_ref &entity) : I_Dependency_component<Cecilion::Transform>(entity), m_parent(), m_transform(this->get_component<Transform>()) {
 
+    }
+
+    Cecilion::Component_ref<Transform> GameNode::transform() {
+        return this->m_transform;
     }
 }
 

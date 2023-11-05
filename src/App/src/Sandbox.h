@@ -11,33 +11,3 @@
 
 #include <Cecilion.h>
 #include <yaml-cpp/yaml.h>
-
-
-
-
-
-class BehaviourScript {
-public:
-    BehaviourScript(const BehaviourScript&) = delete;
-    BehaviourScript& operator=(const BehaviourScript&) = delete;
-
-    virtual void start(){}
-    virtual void active(){}
-    virtual void inactive(){}
-    virtual void update(){}
-    virtual void destroy(){}
-};
-
-
-
-class Transform: BehaviourScript {
-
-    bool operator==(const Transform& other) const;
-    bool operator!=(const Transform& other) const;
-    bool operator==(std::nullptr_t _);
-    bool operator!=(std::nullptr_t _);
-
-private:
-
-
-};
