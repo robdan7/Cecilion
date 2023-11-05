@@ -3,7 +3,7 @@
 #include <source_location>
 
 namespace Cecilion {
-    auto test = std::source_location::current();
+    REGISTER_SERIALIZABLE_COMPONENT(GameNode);
 
     GameNode::GameNode(const Cecilion::Entity_ref &entity, const Component_ref<GameNode>& parent): I_Dependency_component<Cecilion::Transform>(std::forward<const Entity_ref>(entity)), m_parent(parent), m_transform(this->get_component<Transform>()) {
         if (this->m_entity == nullptr) {
@@ -43,6 +43,30 @@ namespace Cecilion {
 
     Cecilion::Component_ref<Transform> GameNode::transform() {
         return this->m_transform;
+    }
+
+    YAML::Node GameNode::serialize() {
+        YAML::Node node;
+        node[Cecilion::Serializable::s_type_declaration] = "Potato";
+        return node;
+    }
+
+    Serializable &GameNode::operator=(const YAML::Node &serializedNode) {
+        return *this;
+    }
+
+    GameNode::GameNode(GameNode &&other): I_Dependency_component<Cecilion::Transform>(other.m_entity), m_transform(other.m_transform), m_parent(other.m_parent), m_children(std::move(other.m_children)) {
+        other.m_parent.operator=(nullptr);
+        other.m_transform = nullptr;
+    }
+
+    GameNode &GameNode::operator=(GameNode &&other) {
+        this->m_children = std::move(other.m_children);
+        this->m_parent = std::move(other.m_parent);
+        this->m_transform = std::move(other.m_transform);
+        I_Component::operator=(std::move(other));
+
+        return *this;
     }
 }
 

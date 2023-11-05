@@ -81,5 +81,17 @@ namespace Cecilion {
         return this->p_ecs->add_component(node,*this);
     }
 
+    YAML::Node Entity_ref::serialize() {
+        if (this->operator==(nullptr)) {
+            throw std::runtime_error("Cannot serialize null entity");
+        }
+        return this->p_ecs->serialize(*this);
+    }
+
+    Serializable &Entity_ref::operator=(const YAML::Node &serializedNode) {
+        // TODO not implemented
+        return *this;
+    }
+
 
 }

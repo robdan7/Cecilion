@@ -274,6 +274,9 @@ namespace Cecilion {
             return static_cast<Entity_storage<C> *>(this->m_component_storage[typeid(C)]);
         }
 
+        YAML::Node serialize(const Entity_ref& entity);
+
+
     private:
 
         std::unordered_map<std::type_index, I_Entity_storage *> m_component_storage;
@@ -307,11 +310,15 @@ namespace Cecilion {
         std::size_t m_refs = 0;
     };
 
-    struct Entity_ref {
+    struct Entity_ref: public Serializable {
         friend class ECS;
         friend class I_Component_ref;
     public:
         using Entity_ID = ECS_ENTITY_SIZE;
+
+        YAML::Node serialize() override;
+
+        Serializable &operator=(const YAML::Node &serializedNode) override;
 
         Entity_ref(Entity_ref&& other) noexcept;
 
@@ -392,7 +399,7 @@ namespace Cecilion {
     public:
         I_Component(I_Component&& other) noexcept;
         I_Component& operator=(I_Component&& other)  noexcept;
-        ~I_Component() = default;
+        virtual ~I_Component() = default;
 
         bool operator ==(const std::nullptr_t & _);
 
@@ -467,12 +474,13 @@ namespace Cecilion {
         ~Component_ref() {
             if (this->m_entity != nullptr) {
                 this->template subtract_source_ref<C>();
+                this->m_entity = nullptr;
             }
         }
 
         Component_ref& operator=(const std::nullptr_t& _) {
             if (this->m_entity != nullptr) {
-                ~Component_ref<C>();
+                this->template subtract_source_ref<C>();
                 this->m_entity = nullptr;
             }
         }

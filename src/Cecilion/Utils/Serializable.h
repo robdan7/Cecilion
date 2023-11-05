@@ -9,5 +9,7 @@ namespace Cecilion {
         virtual Serializable& operator=(const YAML::Node& serializedNode) = 0;
 
         static const char* s_type_declaration;
+        static const char* s_id_declaration;
+        static const char* s_component_list_declaration;
     };
 }

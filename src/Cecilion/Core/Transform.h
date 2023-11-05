@@ -5,6 +5,7 @@
 
 namespace Cecilion {
     class Transform: public Cecilion::I_Component, public Cecilion::Serializable {
+        friend class ECS;
     public:
         Transform(const Cecilion::Entity_ref& ref): Cecilion::I_Component(ref) {
             std::cout << "Creating transform for component" << std::endl;

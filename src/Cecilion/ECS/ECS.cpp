@@ -1,9 +1,10 @@
 #include "ECS.h"
 #include "Config.h"
-
 #include <Core/Log.h>
 #include <iostream>
+#include <Utils/Type.h>
 namespace Cecilion {
+
     ECS::~ECS() {
         auto storageCopy = this->m_component_storage;
         this->m_component_storage.clear();
@@ -110,6 +111,23 @@ namespace Cecilion {
             // TODO Better error
             throw std::runtime_error("could not find type declaration in yaml while deserializing component");
         }
+    }
+
+    YAML::Node ECS::serialize(const Entity_ref &entity) {
+        YAML::Node node;
+        node[Cecilion::Serializable::s_id_declaration] = entity.id();
+        for (auto & it : this->m_component_storage) {
+            auto storage = it.second;
+            if (storage->has_ID(entity.id())) {
+                if (dynamic_cast<Serializable*>(storage->unsafe_get(entity.id()))) {
+                    // Wohoo the object type is serializable!
+                    node[Serializable::s_component_list_declaration].push_back((dynamic_cast<Serializable*>(storage->unsafe_get(entity.id())))->serialize());
+                }
+            } else {
+                std::cout << "Component type " << it.first.name() << " is not serializable" << std::endl;
+            }
+        }
+        return node;
     }
 
     bool Entity_source::operator==(const Entity_source &other) const {

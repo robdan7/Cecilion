@@ -50,6 +50,8 @@ public :
             // All gameNodes have a transform
             std::cout << "Scene has transform component? " << ((scene.transform() != nullptr) ? "Yes" :"No") << std::endl;
 
+            std::cout << scene.entity().serialize() << std::endl;
+
             if (scene.has_component<Test_component>()) {
                 auto ref = scene.get_component<Test_component>();
                 ref.operator->().my_number = 123;

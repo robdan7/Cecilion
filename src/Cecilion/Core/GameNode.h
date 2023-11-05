@@ -7,23 +7,33 @@
 #include <vector>
 #include "Transform.h"
 namespace Cecilion {
-    class GameNode: public I_Dependency_component<Cecilion::Transform> {
+    class GameNode: public I_Dependency_component<Cecilion::Transform>, public Serializable {
+        friend ECS;
     public:
+        GameNode(GameNode&& other);
+        explicit GameNode(const Cecilion::Entity_ref& entity);
+
+        GameNode& operator=(GameNode&& other);
         GameNode(const GameNode&) = delete;
         GameNode& operator=(const GameNode&) = delete;
         GameNode() = delete;
 
+        ~GameNode() {}
         [[deprecated]]
         I_Component_ref parse_component(const YAML::Node& node) {
             return this->m_entity.add_component(node);
         }
+
         void setParent(Component_ref<GameNode>& new_parent);
 
         Cecilion::Component_ref<Transform> transform();
 
+        YAML::Node serialize() override;
+
+        Serializable &operator=(const YAML::Node &serializedNode) override;
+
     protected:
         explicit GameNode(const Cecilion::Entity_ref& entity, const Component_ref<GameNode>& parent);
-        explicit GameNode(const Cecilion::Entity_ref& entity);
 
     private:
         virtual void start(){}
