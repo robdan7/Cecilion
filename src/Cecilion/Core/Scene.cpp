@@ -13,4 +13,8 @@ namespace Cecilion {
     I_Scene::I_Scene() : p_ecs(new Cecilion::ECS()){
 
     }
+/*
+    YAML::Node Scene::serialize() {
+        //return this->entity().serialize();
+    }*/
 } // Cecilion

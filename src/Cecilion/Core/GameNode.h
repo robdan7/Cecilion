@@ -1,13 +1,10 @@
 #pragma once
 #include <ECS/ECS.h>
-#include <ECS/Config.h>
-#include <ECS/Entity.h>
-#include <ECS/Component.h>
+#include <ECS/I_Dependency_component.h>
 #include <yaml-cpp/yaml.h>
-#include <vector>
 #include "Transform.h"
 namespace Cecilion {
-    class GameNode: public I_Dependency_component<Cecilion::Transform>, public Serializable {
+    class GameNode: public I_Dependency_component<Cecilion::Transform> {
         friend ECS;
     public:
         GameNode(GameNode&& other);
@@ -21,19 +18,14 @@ namespace Cecilion {
         ~GameNode() {}
         [[deprecated]]
         I_Component_ref parse_component(const YAML::Node& node) {
-            return this->m_entity.add_component(node);
+            return this->entity().add_component(node);
         }
-
-        void setParent(Component_ref<GameNode>& new_parent);
 
         Cecilion::Component_ref<Transform> transform();
 
-        YAML::Node serialize() override;
+        YAML::Node serialize();
 
-        Serializable &operator=(const YAML::Node &serializedNode) override;
-
-    protected:
-        explicit GameNode(const Cecilion::Entity_ref& entity, const Component_ref<GameNode>& parent);
+        Serializable& operator=(const YAML::Node& node);
 
     private:
         virtual void start(){}
@@ -42,9 +34,6 @@ namespace Cecilion {
         virtual void update(){}
         virtual void destroy(){}
 
-    private:
-        Component_ref<GameNode> m_parent;
-        std::vector<Component_ref<GameNode>> m_children;
         Component_ref<Transform> m_transform;
     };
 }

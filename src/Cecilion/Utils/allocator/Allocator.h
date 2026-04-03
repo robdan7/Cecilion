@@ -257,6 +257,7 @@ namespace Cecilion {
     template<int page_t>
     class I_page_storage {
     public:
+        virtual ~I_page_storage() = default;
 
         std::size_t size() const {
             return this->m_size;
@@ -332,6 +333,10 @@ namespace Cecilion {
         }
 
         void free(std::size_t index) {
+
+            // TODO Throw error if we're trying to delete invalid index?
+            if (!this->has_entry(index)) return;
+
             const std::size_t page = this->page(index);
             const std::size_t offset = this->offset(index);
             // ORVOX_ASSERT(this->m_index[page], "Index out of range"); TODO Error
@@ -425,21 +430,22 @@ namespace Cecilion {
         }
 
         template<typename... Args>
-        void emplace(const std::size_t& index, Args... args) {
+        void emplace_at(const std::size_t& index, Args... args) {
             auto page = this->page(index);
             auto offset = this->offset(index);
 
-            if (this->m_page_sizes[page] == (uint32_t)1 << (8 * page_t)) {
-                // ORVOX_ERROR("Page is out of range"); TODO Error
-            }
-            else if (this->m_pages[page] == nullptr) {
-                Container* new_page = (Container*)std::calloc(((uint32_t)1 << (8 * sizeof(offset_t))), sizeof(Container));
+            if (this->m_pages[page] == nullptr) {
+                auto* new_page = static_cast<Container *>(std::calloc((static_cast<uint32_t>(1) << (8 * sizeof(offset_t))), sizeof(Container)));
                 //T* new_page = new T[((uint32_t)1<< (8*sizeof(offset_t)))];
 
                 // ORVOX_ASSERT(new_page, "BAD ALLOC"); TODO Error
                 this->m_pages[page] = new_page;
 
-                this->m_n_of_pages++;
+                ++this->m_n_of_pages;
+            }
+            else if (this->m_page_sizes[page] == (uint32_t)1 << (8 * sizeof(offset_t))) {
+                // ORVOX_ERROR("Page is out of range"); TODO Error
+                throw std::out_of_range("Cannot emplace more in page");
             }
             /*
 			if constexpr (std::is_aggregate_v<T>) {
@@ -449,22 +455,49 @@ namespace Cecilion {
 				new(&this->m_pages[page][offset]) T(std::forward<Args>(args)...);
 			}*/
             this->m_pages[page][offset].Emplace(std::forward<Args>(args)...);
-            this->m_page_sizes[page] ++;
-            this->m_size++;
+            ++this->m_page_sizes[page];
+            ++this->m_size;
+        }
+
+        template<typename... Args>
+        std::size_t emplace(Args... args) {
+            std::size_t current_page = 0;
+            while (this->m_page_sizes[current_page] == (uint32_t)1 << (8 * sizeof(offset_t))) {
+                // Loop through full pages.
+                ++current_page;
+            }
+            std::size_t offset = 0;
+            if (this->m_pages[current_page] == nullptr) {
+                auto* new_page = static_cast<Container *>(std::calloc((static_cast<uint32_t>(1) << (8 * sizeof(offset_t))), sizeof(Container)));
+
+                // ORVOX_ASSERT(new_page, "BAD ALLOC"); TODO Error
+                this->m_pages[current_page] = new_page;
+
+                ++this->m_n_of_pages;
+            } else {
+                while (this->m_pages[current_page][offset].valid) {
+                    ++offset;
+                }
+            }
+            this->m_pages[current_page][offset].Emplace(std::forward<Args>(args)...);
+            ++this->m_page_sizes[current_page];
+            ++this->m_size;
+
+            return current_page * ((static_cast<uint32_t>(1) << 8 * page_t)) + offset;
         }
 
         void push(const std::size_t& index, T&& arg) {
             auto page = this->page(index);
             auto offset = this->offset(index);
 
-            if (this->m_page_sizes[page] == (uint32_t)1 << (8 * page_t)) {
+            if (this->m_page_sizes[page] == static_cast<uint32_t>(1) << (8 * page_t)) {
                 // ORVOX_ERROR("Page is out of range"); TODO Error
             }
             else if (this->m_pages[page] == nullptr) {
-                Container* new_page = (Container*)std::calloc(((uint32_t)1 << (8 * sizeof(offset_t))), sizeof(Container));
+                auto* new_page = static_cast<Container *>(std::calloc((static_cast<uint32_t>(1) << (8 * sizeof(offset_t))), sizeof(Container)));
                 // ORVOX_ASSERT(new_page, "BAD ALLOC"); TODO Error
                 this->m_pages[page] = new_page;
-                this->m_n_of_pages++;
+                ++this->m_n_of_pages;
             }
             //this->m_pages[page][offset] = arg;
 
@@ -478,8 +511,34 @@ namespace Cecilion {
              */
             this->m_pages[page][offset].Create(arg);
 
-            this->m_page_sizes[page] ++;
-            this->m_size++;
+            ++this->m_page_sizes[page];
+            ++this->m_size;
+        }
+
+        std::size_t push(T && arg) {
+            std::size_t current_page = 0;
+            while (this->m_page_sizes[current_page] == (uint32_t)1 << (8 * sizeof(offset_t))) {
+                // Loop through full pages.
+                ++current_page;
+            }
+            std::size_t offset = 0;
+            if (this->m_pages[current_page] == nullptr) {
+                auto* new_page = static_cast<Container *>(std::calloc((static_cast<uint32_t>(1) << (8 * sizeof(offset_t))), sizeof(Container)));
+
+                // ORVOX_ASSERT(new_page, "BAD ALLOC"); TODO Error
+                this->m_pages[current_page] = new_page;
+
+                ++this->m_n_of_pages;
+            } else {
+                while (this->m_pages[current_page][offset].valid) {
+                    ++offset;
+                }
+            }
+            this->m_pages[current_page][offset].Create(arg);
+            ++this->m_page_sizes[current_page];
+            ++this->m_size;
+
+            return current_page * ((static_cast<uint32_t>(1) << 8 * page_t)) + offset;
         }
 
         /**
@@ -500,8 +559,8 @@ namespace Cecilion {
             return this->m_n_of_pages > 0 && this->m_pages[this->page(index)] != nullptr;
         }
 
-        bool not_null(std::size_t index, const T& null_value) const {
-            return this->has_page_indexed(index) && this[index] != null_value;
+        bool not_null(std::size_t index) const {
+            return this->has_page_indexed(index) && this->m_pages[this->page(index)][this->offset(index)].valid;
         }
 
         void free(const std::size_t& index) {
@@ -522,15 +581,15 @@ namespace Cecilion {
             this->m_size--;
         }
 
-        std::size_t n_pages() const {
+        [[nodiscard]] std::size_t n_pages() const {
             return this->m_n_of_pages;
         }
 
     protected:
-        size_t page(const size_t& index) const override {
+        [[nodiscard]] size_t page(const size_t& index) const override {
             return index / (((uint32_t)1 << 8 * page_t));
         }
-        size_t offset(const size_t& index) const override {
+        [[nodiscard]] size_t offset(const size_t& index) const override {
             return index % (((uint32_t)1 << 8 * page_t));
         }
     private:
@@ -568,8 +627,8 @@ namespace Cecilion {
             }
         };
         uint32_t m_n_of_pages = 0;
-        Container* m_pages[(uint32_t)1 << (8 * page_t)] = { nullptr };
-        std::size_t m_page_sizes[(uint32_t)1 << (8 * page_t)] = { 0 };
+        Container* m_pages[static_cast<uint32_t>(1) << (8 * page_t)] = { nullptr };
+        std::size_t m_page_sizes[static_cast<uint32_t>(1) << (8 * page_t)] = { 0 };
     };
 
     template<int page_t, typename offset_t, class T>
@@ -587,7 +646,7 @@ namespace Cecilion {
 
         template<typename... Args>
         std::size_t emplace(Args... args) {
-            this->m_pool.emplace(this->m_pool.size(), std::forward<Args>(args)...);
+            this->m_pool.emplace_at(this->m_pool.size(), std::forward<Args>(args)...);
             return this->size() - 1;
         }
 

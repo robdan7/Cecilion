@@ -54,18 +54,33 @@ namespace Cecilion {
         }
 
         template<typename... Args>
-        T& emplace_entry(const std::size_t& ID, Args... args) {
+        T& emplace_with_id(const std::size_t& ID, Args... args) {
             auto packed_index = this->m_packed_set.emplace(std::forward<Args>(args)...);
-            this->m_index_set.emplace(ID, packed_index);
+            this->m_index_set.emplace_at(ID, packed_index);
             this->m_packed_index.emplace(ID);
             return this->m_packed_set[packed_index];
         }
 
+        template<typename... Args>
+        ID_t emplace(Args&&... args) {
+            auto packed_index = this->m_packed_set.emplace(std::forward<Args>(args)...);
+            auto id = this->m_index_set.emplace(packed_index);
+            this->m_packed_index.emplace(id);
+            return id;
+        }
+
         T& push_entry(const std::size_t& ID, const T& arg) {
             auto packed_index = this->m_packed_set.push(arg);
-            this->m_index_set.emplace(ID, packed_index);
+            this->m_index_set.emplace_at(ID, packed_index);
             this->m_packed_index.push(ID);
             return this->m_packed_set[packed_index];
+        }
+
+        ID_t push_entry(const T& arg) {
+            auto packed_index = this->m_packed_set.push(arg);
+            auto id = this->m_index_set.emplace(packed_index);
+            this->m_packed_index.emplace(id);
+            return id;
         }
 
         void delete_entry(const std::size_t& ID) override {

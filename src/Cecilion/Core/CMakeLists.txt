@@ -25,7 +25,8 @@ add_library(Cecilion_Core STATIC ""
         Scene.cpp
         Scene.h
         Transform.cpp
-        Transform.h)
+        Transform.h
+)
 target_sources(Cecilion_Core
         PUBLIC
         Application.cpp

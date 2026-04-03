@@ -88,7 +88,7 @@ namespace Cecilion {
 				for (uint32_t i = 0; i < (uint32_t)1 << (8 * ECS_PAGE_BYTES) && max_iterations > 0; ++i) {
 					auto page_start = i * ((uint32_t)1 << (8 * sizeof(ECS_OFFSET_TYPE)));
 					if (auto all_pages = (std::get<Sparse_table<ECS_ENTITY_SIZE, ECS_PAGE_BYTES, ECS_OFFSET_TYPE, Components>*>(this->p_storage)->has_table(i)&&...); all_pages) {
-						max_iterations--;
+						--max_iterations;
 
 						/// Run this loop for all k without calculating the max value of k.
 						ECS_OFFSET_TYPE k = 0;
@@ -97,7 +97,7 @@ namespace Cecilion {
 								this->m_component_cache.emplace_back(page_start + k, (*std::get<Sparse_table<ECS_ENTITY_SIZE, ECS_PAGE_BYTES, ECS_OFFSET_TYPE, Components>*>(this->p_storage))[page_start + k]...);
 							}
 							k++;
-							max_iterations--;
+							--max_iterations;
 						} while (k != 0 && max_entities);
 					}
 				}
@@ -111,7 +111,7 @@ namespace Cecilion {
 		 */
 		auto get_smallest_sparse() {
 			return (std::min)({ ((I_sparse_table*)(std::get<Sparse_table<ECS_ENTITY_SIZE,ECS_PAGE_BYTES,ECS_OFFSET_TYPE,Components>*>(this->p_storage)))... }, [](const auto* left, const auto* right) {
-				return left->n_sparse_pages() < left->n_sparse_pages();
+				return left->n_sparse_pages() < right->n_sparse_pages();
 				});
 		}
 

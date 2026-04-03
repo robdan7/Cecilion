@@ -1,19 +1,19 @@
-#include "Entity.h"
+#include "Entity_ref.h"
+#include "I_Component.h"
 #include "ECS.h"
+#include "Entity_metadata.h"
 
-namespace Cecilion {
-
-
-
+/*
     Entity_ref::~Entity_ref()  {
-        /*
-        if (this->p_source != nullptr && this->p_source->operator!=(nullptr)) {
-            this->p_source->m_refs --;
-            if(this->p_source->m_refs == 0) {
+
+        if (this->m_source != nullptr && this->m_source->operator!=(nullptr)) {
+            this->m_source->m_refs --;
+            if(this->m_source->m_refs == 0) {
                 // Delete entity
-                this->p_ecs->delete_entity(this->p_source->m_entity_ID);
+                this->p_ecs->delete_entity(this->m_source->m_entity_ID);
             }
-        }*/
+        }
+
     }
 
     Entity_ref::Entity_ref(const Entity_ref &other) noexcept: p_ecs(other.p_ecs), m_source(other.m_source) {
@@ -26,9 +26,9 @@ namespace Cecilion {
     }
 
     Entity_ref &Entity_ref::operator=(Entity_ref &&obj) noexcept  {
-        //this->p_source = obj.p_source;
+        this->m_source = obj.m_source;
         this->p_ecs = obj.p_ecs;
-        //obj.p_source = nullptr;
+        //obj.m_source = nullptr;
         obj.p_ecs = nullptr;
         return *this;
     }
@@ -87,20 +87,4 @@ namespace Cecilion {
 
     I_Component_ref Entity_ref::add_component(const YAML::Node &node) const {
         return this->p_ecs->add_component(node,*this);
-    }
-/*
-    YAML::Node Entity_ref::serialize() {
-        if (this->operator==(nullptr)) {
-            throw std::runtime_error("Cannot serialize null entity");
-        }
-        return this->p_ecs->serialize(*this);
-    }
-*/
-    /*
-    Serializable &Entity_ref::operator=(const YAML::Node &serializedNode) {
-        // TODO not implemented
-        return *this;
     }*/
-
-
-}

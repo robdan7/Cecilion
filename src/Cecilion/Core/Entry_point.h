@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <Debug/Instrumentor.h>
+#include "Core/Log.h"
 //#include "Event/Event_system.h"
 
 /**

@@ -16,10 +16,6 @@ namespace Cecilion {
         this->m_id = dist(mt);
     }
 
-    void Uuid::Destroy() {
-        this->m_id = 0;
-    }
-
     bool Uuid::operator==(const Uuid &other) const {
         if (this->m_id != 0 && other.m_id != 0 && this->m_id == other.m_id) {
             // TODO Proper error
@@ -34,13 +30,6 @@ namespace Cecilion {
             throw std::exception();
         }
         return true;
-    }
-
-    Uuid Uuid::Null() {
-        return Uuid(0);
-    }
-
-    Uuid::Uuid(uint64_t id) : m_id(id) {
     }
 
      std::string Uuid::to_string(const Uuid &uuid) {

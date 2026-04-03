@@ -1,47 +1,54 @@
 #include "ECS.h"
+#include "ECS_functions.h"
 #include "Config.h"
-#include <Core/Log.h>
 #include <iostream>
+#include <ranges>
 #include <Utils/Type.h>
+#include "Entity_metadata.h"
+
 namespace Cecilion {
 
     ECS::~ECS() {
         auto storageCopy = this->m_component_storage;
         this->m_component_storage.clear();
-        for (auto & it : storageCopy) {
-            delete it.second;
+        for (auto &val: storageCopy | std::views::values) {
+            delete val;
         }
     }
 
-    void ECS::delete_entity(ECS::Entity_ID ID) {
-        if (ID == ECS_NULL_ENTITY) return;
-        if (!this->m_entities.has_entry(ID)) {
+    void ECS::delete_entity(const Entity_ref &reference) {
+        if (reference.id() == ECS_NULL_ENTITY) return;
+
+        // TODO change to entity storage has id for entity metadata
+        // Check this.has_component for the ID
+        if (!this->has_component<Entity_metadata>(reference.id())) {
             // TODO Error. Already deleted.
             throw std::exception();
         }
 
-        this->m_entities[ID].m_entity_ID = ECS_NULL_ENTITY;
+        //this->m_entities[reference].m_entity_ID = ECS_NULL_ENTITY;
 
-        for (auto & it : this->m_component_storage) {
-            auto storage = it.second;
-            if (storage->has_ID(ID)) {
-                auto entity = storage->unsafe_get(ID);
+        for (auto &val: this->m_component_storage | std::views::values) {
+            auto storage = val;
+            if (storage->has_ID(reference.id())) {
+                auto entity = storage->unsafe_get(reference.id());
                 if(entity->m_refs == 0) {
-                    storage->try_delete(ID);
+                    storage->try_delete(reference.id());
                 } else {
                     // There are still references to this object. It cannot be deleted.
                     // This function call will mark the object as deleted.
-                    storage->unsafe_get(ID)->Destroy();
+                    storage->unsafe_get(reference.id())->Destroy();
                 }
             }
         }
 
-        if (this->m_entities[ID].m_refs == 0) {
+        /*
+        if (this->m_entities[reference].m_refs == 0) {
 
             for (auto & it : this->m_component_storage) {
                 auto storage = (Entity_storage<I_Component>*)(it.second);
-                if (storage->has_ID(ID)) {
-                    if(storage->unsafe_get(ID)->m_refs > 0) {
+                if (storage->has_ID(reference)) {
+                    if(storage->unsafe_get(reference)->m_refs > 0) {
                         // TODO Error. There can't exist any components with references when
                         // The entity does not.
                         throw std::exception();
@@ -50,8 +57,8 @@ namespace Cecilion {
             }
 
             // Completely delete the entity once all references have been deleted.
-            this->m_entities.free(ID);
-        }
+            this->m_entities.free(reference);
+        }*/
     }
 
 
@@ -77,16 +84,25 @@ namespace Cecilion {
 
     Entity_ref ECS::create_entity() {
 
-        // This may throw error.
-        auto id = this->m_entities.alloc();
 
-        this->m_entities.at(id).m_entity_ID = id;
+        if (!this->m_component_storage.contains(typeid(Entity_metadata))) {
+            //this->m_component_storage[typeid(Entity_metadata)] = new Entity_storage<Entity_metadata>();
+        }
 
-        return Entity_ref(this, &this->m_entities[id]);
+        // ORVOX_TRACE("Emplaced {0} component for ID {1}", typeid(C).name(), ID); TODO Error
+        Entity_ref entity_ref(this, 0);
+
+
+        // TODOOOOO
+        //const auto id = static_cast<Entity_storage<Entity_metadata> *>(this->m_component_storage[typeid(Entity_metadata)])->emplace();
+
+        auto ref =  Entity_ref(this, 0);
+        return ref;
     }
 
     Entity_ref ECS::create_entity(const YAML::Node &yaml) {
-        return Entity_ref(this, nullptr);
+        // TODO
+        return Entity_ref(this, 0);
     }
 
     I_Component_ref
@@ -103,7 +119,7 @@ namespace Cecilion {
             std::string type_key = yaml[Cecilion::Serializable::s_type_declaration].as<std::string>();
             auto reg = ECS::getSerializableComponentRegistry();
             if (!reg.contains(type_key)) {
-                // TODO BEtter error
+                // TODO Better error
                 throw std::runtime_error("Serialization registry does not contain component type");
             }
             return reg[type_key](this,yaml,entity_reference);
@@ -113,55 +129,31 @@ namespace Cecilion {
         }
     }
 
-    YAML::Node ECS::serialize(const Entity_ref &entity) {
+    YAML::Node ECS::serialize(const Entity_ref &entity) const {
         YAML::Node node;
         node[Cecilion::Serializable::s_id_declaration] = entity.id();
-        for (auto & it : this->m_component_storage) {
-            auto storage = it.second;
+        for (const auto &[fst, snd] : this->m_component_storage) {
+            auto storage = snd;
             if (storage->has_ID(entity.id())) {
                 if (dynamic_cast<Serializable*>(storage->unsafe_get(entity.id()))) {
                     // Wohoo the object type is serializable!
                     node[Serializable::s_component_list_declaration].push_back((dynamic_cast<Serializable*>(storage->unsafe_get(entity.id())))->serialize());
                 }
             } else {
-                std::cout << "Component type " << it.first.name() << " is not serializable" << std::endl;
+                std::cout << "Component type " << fst.name() << " is not serializable" << std::endl;
             }
         }
         return node;
     }
 
-    bool Entity_source::operator==(const Entity_source &other) const {
+    bool Entity_metadata::operator==(const Entity_metadata &other) const {
         return this->m_refs == other.m_refs && this->m_entity_ID == other.m_entity_ID;
     }
 
-    bool Entity_source::operator!=(const Entity_source &other) const {
+    bool Entity_metadata::operator!=(const Entity_metadata &other) const {
         return this->m_refs != other.m_refs || this->m_entity_ID != other.m_entity_ID;
     }
 
-    bool I_Component::operator==(const std::nullptr_t& _) {
-        return this->m_entity.operator==(nullptr);
-    }
-
-    void I_Component::Destroy() {
-        this->m_entity = nullptr;
-    }
-
-    I_Component::I_Component(I_Component &&other) noexcept : m_entity(std::move(other.m_entity)) {
-        other.m_entity = nullptr;
-    }
-
-    I_Component &I_Component::operator=(I_Component &&other) noexcept {
-        this->m_entity.operator=(std::move(other.m_entity));
-        return *this;
-    }
-
-    Entity_ref &I_Component::entity()  {
-        return this->m_entity;
-    }
-
-    I_Component::I_Component(const Entity_ref &ref): m_entity(std::forward<const Entity_ref>(ref)){
-
-    }
 
     I_Component_ref::I_Component_ref(const Entity_ref &entity): m_entity(std::forward<const Entity_ref>(entity)){
         if (entity == nullptr) {
