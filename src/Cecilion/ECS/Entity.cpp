@@ -1,4 +1,3 @@
-#include "Entity.h"
 #include "ECS.h"
 
 namespace Cecilion {
@@ -6,10 +5,13 @@ namespace Cecilion {
 
 
     Entity_ref::~Entity_ref()  {
-        /*
-        if (this->p_source != nullptr && this->p_source->operator!=(nullptr)) {
-            this->p_source->m_refs --;
-            if(this->p_source->m_refs == 0) {
+/*
+        if (this->m_source != ECS_NULL_ENTITY && this->p_ecs != nullptr) {
+            auto ref = this->get_component<Entity_metadata>();
+            --ref.operator->().m_refs;
+            // TODO Entities should not be deleted just because no components are referencing them. Or...?
+
+            if(ref.operator->().m_refs == 0) {
                 // Delete entity
                 this->p_ecs->delete_entity(this->p_source->m_entity_ID);
             }
@@ -17,23 +19,25 @@ namespace Cecilion {
     }
 
     Entity_ref::Entity_ref(const Entity_ref &other) noexcept: p_ecs(other.p_ecs), m_source(other.m_source) {
-        //this->m_source->m_refs++;
+        //this->get_component<Entity_metadata>().operator->().m_refs++;
     }
 
     Entity_ref::Entity_ref(Entity_ref && other) noexcept: p_ecs(other.p_ecs), m_source(other.m_source) {
-        //other.m_source = nullptr;
+        other.m_source = ECS_NULL_ENTITY;
         other.p_ecs = nullptr;
     }
 
     Entity_ref &Entity_ref::operator=(Entity_ref &&obj) noexcept  {
         //this->p_source = obj.p_source;
+        this->m_source = obj.m_source;
         this->p_ecs = obj.p_ecs;
-        //obj.p_source = nullptr;
+        obj.m_source = ECS_NULL_ENTITY;
         obj.p_ecs = nullptr;
         return *this;
     }
 
     Entity_ref & Entity_ref::operator=(std::nullptr_t &&_) {
+        /*
         if (this->m_source != ECS_NULL_ENTITY) {
             auto component = this->get_component<Entity_metadata>();
             if (component.operator->().m_refs == 0) {
@@ -41,7 +45,7 @@ namespace Cecilion {
                 throw std::runtime_error("ECS::Entity::Entity_ref: ECS_NULL_ENTITY");
             }
             component.operator->().m_refs --;
-        }
+        }*/
         this->m_source = ECS_NULL_ENTITY;
         this->p_ecs = nullptr;
         return *this;
@@ -60,8 +64,6 @@ namespace Cecilion {
         if (this->m_source == ECS_NULL_ENTITY || p_ecs == nullptr) {
             // TODO Error
             throw std::runtime_error("ECS::Entity::Entity_ref: ECS_NULL_ENTITY");
-        } else {
-            this->get_component<Entity_metadata>().operator->().m_refs++;
         }
     }
 

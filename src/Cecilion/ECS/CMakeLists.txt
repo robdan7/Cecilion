@@ -1,6 +1,5 @@
 add_library(Cecilion_ECS STATIC ECS.cpp
         Entity.cpp
-        Entity.h
 )
 
 find_library(YAML yaml-cpp ${PROJECT_SOURCE_DIR}/include)

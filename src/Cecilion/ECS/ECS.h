@@ -21,12 +21,9 @@ namespace Cecilion {
 
     class ECS;
 
-    struct Entity_ref;
+    class Entity_ref;
 
     class Entity_metadata;
-
-    class I_Component;
-
 
     template<class C>
     class Component_ref;
@@ -187,7 +184,7 @@ namespace Cecilion {
 
         template<typename C, std::enable_if_t<std::is_base_of_v<I_Component, C>> * = nullptr, typename... Args>
         Component_ref<C>
-        add_component(const ECS_ENTITY_SIZE &entity, const Entity_ref &entity_reference, Args... args);/* {
+        add_component(const Entity_ref &entity_reference, Args... args);/* {
             //ORVOX_ASSERT(ID, "Tried to access invalid entity ID");
             // ORVOX_ASSERT(this, "Could not find an active ECS context"); TODO Error
             if (this->m_component_storage.count(typeid(C)) == 0) {
@@ -288,10 +285,6 @@ namespace Cecilion {
 
 
 
-//#include "Entity.h"
-
-
-
     class Entity_ref {
         friend class ECS;
         friend class I_Component_ref;
@@ -306,12 +299,13 @@ namespace Cecilion {
 
         Entity_ref(const Entity_ref& other) noexcept;
 
-        Entity_ref(){}
+
 
         Entity_ref& operator=(const Entity_ref& other);
 
         Entity_ref& operator=(Entity_ref&& obj)  noexcept;
 
+        // TODO Remove this?
         Entity_ref& operator=(std::nullptr_t&& _);
 
         ~Entity_ref();
@@ -338,10 +332,10 @@ namespace Cecilion {
 
         template<typename C, std::enable_if_t<std::is_base_of_v<I_Component, C>> * = nullptr>
         Component_ref<C> add_component() {
-            return this->p_ecs->add_component<C>(this->id(),*this);
+            return this->p_ecs->add_component<C>(*this);
         }
 
-        I_Component_ref add_component(const YAML::Node& node) const;
+        [[nodiscard]] I_Component_ref add_component(const YAML::Node& node) const;
 
         template<typename C, std::enable_if_t<std::is_base_of_v<I_Component, C>> * = nullptr>
         bool has_component() const {
@@ -354,6 +348,8 @@ namespace Cecilion {
         }
 
     private:
+        Entity_ref()= default;
+
         template<class C, std::enable_if_t<std::is_base_of_v<I_Component, C>> * = nullptr>
         C &get_component_source() {
             return this->p_ecs->get_component<C>(this->id());
@@ -406,7 +402,6 @@ namespace Cecilion {
 
         }
         Entity_ref m_entity;
-        std::size_t m_refs = 0;
     };
 
     class Entity_metadata : public I_Component {
@@ -426,7 +421,7 @@ namespace Cecilion {
         bool operator!=(const Entity_metadata& other) const;
     private:
         ECS_ENTITY_SIZE m_entity_ID = ECS_NULL_ENTITY;
-        std::size_t m_refs = 0;
+        //std::size_t m_refs = 0;
         Cecilion::Uuid m_uuid = Uuid(); // Holds UUID for serialization and entity traceability.
     };
 
@@ -436,6 +431,8 @@ namespace Cecilion {
         I_Dependency_component(const Entity_ref& ref): I_Component(ref) {
             ((this->check_dependency<dependencies>())||...);
         }
+
+        I_Dependency_component(I_Dependency_component&& other) noexcept: I_Component(std::move(other)) {}
 
     private:
         template<class T>
@@ -452,21 +449,33 @@ namespace Cecilion {
         Entity_ref& entity() {
             return this->m_entity;
         }
+
+        I_Component_ref& operator=(I_Component_ref&& other) noexcept {
+            this->m_entity = std::move(other.m_entity);
+            return *this;
+        }
     protected:
         I_Component_ref(){}
+
+        I_Component_ref(I_Component_ref&& other) noexcept: m_entity(std::move(other.m_entity)) {}
+
+        I_Component_ref(const I_Component_ref& other) = default;
+
         template<class C>
         C& get_component_source() {
             return this->m_entity.get_component_source<C>();
         }
+        /*
         template<class C, std::enable_if_t<std::is_base_of_v<I_Component, C>> * = nullptr>
         std::size_t add_source_ref() {
             return ++ static_cast<I_Component&>(this->get_component_source<C>()).m_refs;
-        }
+        }*/
 
+        /*
         template<class C, std::enable_if_t<std::is_base_of_v<I_Component, C>> * = nullptr>
         std::size_t subtract_source_ref() {
             return -- static_cast<I_Component&>(this->get_component_source<C>()).m_refs;
-        }
+        }*/
         explicit I_Component_ref(const Entity_ref& entity);
         Entity_ref m_entity;
 
@@ -484,22 +493,29 @@ namespace Cecilion {
         friend class I_Component_ref;
         friend class Entity_ref;
 
+        // TODO Should this be allowed?
         Component_ref()= default;
 
-        ~Component_ref() {
-            if (this->m_entity != nullptr) {
-                this->subtract_source_ref<C>();
-                this->m_entity = nullptr;
-            }
+        ~Component_ref() = default;
+
+        Component_ref(Component_ref&& other) noexcept: I_Component_ref(std::forward<Component_ref>(other.m_entity)) {}
+
+        Component_ref(const Component_ref& other): I_Component_ref(other.m_entity) {}
+
+
+        Component_ref& operator=(Component_ref&& other) noexcept {
+            this->m_entity = std::move(other.m_entity);
+            return *this;
         }
 
+        /*
         Component_ref& operator=(const std::nullptr_t& _) {
             if (this->m_entity != nullptr) {
                 this->subtract_source_ref<C>();
                 this->m_entity = nullptr;
             }
             return *this;
-        }
+        }*/
 
         C &operator->() {
             if (this->operator==(nullptr)) {
@@ -553,9 +569,7 @@ namespace Cecilion {
 */
 
     private:
-        explicit Component_ref(const Entity_ref &entity): I_Component_ref(std::forward<const Entity_ref>(entity)){
-            this->add_source_ref<C>();
-        }
+        explicit Component_ref(const Entity_ref &entity): I_Component_ref(std::forward<const Entity_ref>(entity)){}
 
     };
 
@@ -567,36 +581,35 @@ namespace Cecilion {
         }
 
         if (node[Cecilion::Serializable::s_type_declaration]) {
-            Component_ref<C> component = ecs->add_component<C>(entity_ref.id(),entity_ref);
+            Component_ref<C> component = ecs->add_component<C>(entity_ref);
             component.operator->() = node;
             return static_cast<I_Component_ref>(component);
-        } else {
-            // TODO Better error
-            throw std::runtime_error("could not find type declaration in yaml while deserializing component");
         }
-    }
+        // TODO Better error
+        throw std::runtime_error("could not find type declaration in yaml while deserializing component");
+   }
 
     template<typename C, std::enable_if_t<std::is_base_of_v<I_Component, C>> *, typename ... Args>
-    Component_ref<C> ECS::add_component(const uint16_t &entity, const Entity_ref &entity_reference, Args... args) {
+    Component_ref<C> ECS::add_component(const Entity_ref &entity_reference, Args... args) {
         //ORVOX_ASSERT(ID, "Tried to access invalid entity ID");
         // ORVOX_ASSERT(this, "Could not find an active ECS context"); TODO Error
         if (!this->m_component_storage.contains(typeid(C))) {
             this->m_component_storage[typeid(C)] = new Entity_storage<C>();
         }
 
-        if (this->m_component_storage[typeid(C)]->has_ID(entity)) {
-            // TODO Error
-            throw std::runtime_error("Entity system does not contain any entity with this ID");
+        if (this->m_component_storage[typeid(C)]->has_ID(entity_reference.id())) {
+            // TODO Exception
+            throw std::runtime_error("Entity system already contains a component with ID");
         }
 
         // ORVOX_TRACE("Emplaced {0} component for ID {1}", typeid(C).name(), ID); TODO Error
         Event_system::post<Events::Component_event<C>>(true);
-        static_cast<Entity_storage<C> *>(this->m_component_storage[typeid(C)])->emplace_with_id(entity,
+        static_cast<Entity_storage<C> *>(this->m_component_storage[typeid(C)])->emplace_with_id(entity_reference.id(),
                                                                                               entity_reference,
                                                                                               std::forward<Args>(
                                                                                                       args)...);
 
-        static_cast<Entity_storage<Entity_metadata> *>(this->m_component_storage[typeid(Entity_metadata)])->emplace(entity_reference);
+        //static_cast<Entity_storage<Entity_metadata> *>(this->m_component_storage[typeid(Entity_metadata)])->emplace(entity_reference);
         return Component_ref<C>(entity_reference);
     }
 

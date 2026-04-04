@@ -1,10 +1,8 @@
 #include "ECS.h"
-#include "ECS_functions.h"
 #include "Config.h"
 #include <iostream>
 #include <ranges>
 #include <Utils/Type.h>
-#include "Entity_metadata.h"
 
 namespace Cecilion {
 
@@ -32,13 +30,15 @@ namespace Cecilion {
             auto storage = val;
             if (storage->has_ID(reference.id())) {
                 auto entity = storage->unsafe_get(reference.id());
+                storage->try_delete(reference.id());
+                /*
                 if(entity->m_refs == 0) {
                     storage->try_delete(reference.id());
                 } else {
                     // There are still references to this object. It cannot be deleted.
                     // This function call will mark the object as deleted.
                     storage->unsafe_get(reference.id())->Destroy();
-                }
+                }*/
             }
         }
 
@@ -86,17 +86,20 @@ namespace Cecilion {
 
 
         if (!this->m_component_storage.contains(typeid(Entity_metadata))) {
-            //this->m_component_storage[typeid(Entity_metadata)] = new Entity_storage<Entity_metadata>();
+            this->m_component_storage[typeid(Entity_metadata)] = new Entity_storage<Entity_metadata>();
         }
 
         // ORVOX_TRACE("Emplaced {0} component for ID {1}", typeid(C).name(), ID); TODO Error
-        Entity_ref entity_ref(this, 0);
+        auto ref =  Entity_ref();
 
 
-        // TODOOOOO
-        //const auto id = static_cast<Entity_storage<Entity_metadata> *>(this->m_component_storage[typeid(Entity_metadata)])->emplace();
+        // TODO exception
+        const auto id = dynamic_cast<Entity_storage<Entity_metadata> *>(this->m_component_storage[typeid(Entity_metadata)])->emplace(ref);
 
-        auto ref =  Entity_ref(this, 0);
+        // The ID referenced by metadata is initially empty. Set the proper ID returned from emplace funtion.
+        this->get_component<Entity_metadata>(id).m_entity.m_source = id;
+        ref.m_source = id;
+        ref.p_ecs = this;
         return ref;
     }
 
@@ -147,11 +150,11 @@ namespace Cecilion {
     }
 
     bool Entity_metadata::operator==(const Entity_metadata &other) const {
-        return this->m_refs == other.m_refs && this->m_entity_ID == other.m_entity_ID;
+        return this->m_entity_ID == other.m_entity_ID;
     }
 
     bool Entity_metadata::operator!=(const Entity_metadata &other) const {
-        return this->m_refs != other.m_refs || this->m_entity_ID != other.m_entity_ID;
+        return this->m_entity_ID != other.m_entity_ID;
     }
 
 

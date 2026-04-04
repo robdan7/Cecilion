@@ -1,13 +1,12 @@
 #pragma once
 #include <ECS/ECS.h>
-#include <ECS/I_Dependency_component.h>
 #include <yaml-cpp/yaml.h>
 #include "Transform.h"
 namespace Cecilion {
     class GameNode: public I_Dependency_component<Cecilion::Transform> {
         friend ECS;
     public:
-        GameNode(GameNode&& other);
+        GameNode(GameNode&& other) noexcept;
         explicit GameNode(const Cecilion::Entity_ref& entity);
 
         GameNode& operator=(GameNode&& other);

@@ -13,13 +13,11 @@ namespace Cecilion {
     }
 
     Cecilion::Component_ref<Transform> GameNode::transform() {
-        return this->m_transform;
+        return {this->m_transform};
     }
 
 
-    GameNode::GameNode(GameNode &&other): I_Dependency_component<Cecilion::Transform>(other.entity()), m_transform(other.m_transform) {
-        other.m_transform = nullptr;
-    }
+    GameNode::GameNode(GameNode &&other) noexcept : I_Dependency_component<Cecilion::Transform>(std::move(other)), m_transform(this->get_component<Transform>()) {}
 
     GameNode &GameNode::operator=(GameNode &&other) {
         this->m_transform = std::move(other.m_transform);

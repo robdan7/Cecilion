@@ -2,7 +2,6 @@
 #include <ECS/ECS.h>
 #include <Utils/Serializable.h>
 #include <Utils/Type.h>
-#include "ECS/I_Component.h"
 
 namespace Cecilion {
     class Transform: public Cecilion::I_Component, public Cecilion::Serializable {
@@ -13,8 +12,12 @@ namespace Cecilion {
                 //this->m_parent.operator->().m_children.push_back(this->get_component<Transform>());
             }
         }
-        Transform(Transform&& other) noexcept : Cecilion::I_Component(std::move(static_cast<I_Component&&>(other))), x(other.x), y(other.y), z(other.z), m_parent(other.m_parent) {
-            other.m_parent.operator=(nullptr);
+        Transform(Transform&& other) noexcept : Cecilion::I_Component(std::move(static_cast<I_Component&&>(other))), x(other.x), y(other.y), z(other.z) {
+            this->m_parent = std::move(other.m_parent);
+            this->m_entity = std::move(other.m_entity);
+            this->m_first_child = std::move(other.m_first_child);
+            this->m_next_sibling = std::move(other.m_next_sibling);
+            this->m_prev_sibling = std::move(other.m_prev_sibling);
         }
 
         Transform& operator=(Transform&& other) {

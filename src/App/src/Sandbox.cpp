@@ -7,11 +7,11 @@
 class App2: public Cecilion::Application {
 public:
     App2() {
-        //Cecilion::Scene scene;
+        Cecilion::Scene scene;
         this->shutdown();
     }
     ~App2() override {
-        std::cout << "Destroyed app" << std::endl;
+        CORE_LOG_INFO("Application destroyed!");
     }
 };
 

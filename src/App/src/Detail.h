@@ -6,7 +6,6 @@
 #include <iostream>
 #include <yaml-cpp/yaml.h>
 #include "I_Serializable.h"
-#include <ECS/Entity_ref.h>
 
 namespace Cecilion {
     class I_Serializable;

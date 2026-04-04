@@ -468,10 +468,9 @@ namespace Cecilion {
             }
             std::size_t offset = 0;
             if (this->m_pages[current_page] == nullptr) {
-                auto* new_page = static_cast<Container *>(std::calloc((static_cast<uint32_t>(1) << (8 * sizeof(offset_t))), sizeof(Container)));
-
                 // ORVOX_ASSERT(new_page, "BAD ALLOC"); TODO Error
-                this->m_pages[current_page] = new_page;
+                // TODO Exception.
+                this->m_pages[current_page] = static_cast<Container *>(std::calloc((static_cast<uint32_t>(1) << (8 * sizeof(offset_t))), sizeof(Container)));
 
                 ++this->m_n_of_pages;
             } else {
